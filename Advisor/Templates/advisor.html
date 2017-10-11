@@ -1,0 +1,50 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en" ng-app="advisorApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Django Page</title>
+    <link rel="stylesheet", href={%  static 'Advisor/advisor.css' %}>
+    <script src={% static 'Advisor/angular.min.js' %}></script>
+    <script src={% static 'Advisor/angular-dragdrop.min.js' %}></script>
+    <script src={% static 'Advisor/controllers.js' %}></script>
+</head>
+<body ng-controller="courseListCtrl">
+{% verbatim %}
+<div id="first">
+    <div id="header1">
+    <h1>
+        Plan
+    </h1>
+    </div>
+    <div id="semester">
+            Fall 2012
+    </div>
+    <div id="semester">
+            Spring 2013
+    </div>
+    <div id="semester">
+            Summer 2013
+    </div>
+</div>
+<div id="second">
+    <div id="header2">
+    <h1>
+        Menu
+    </h1>
+    </div>
+    <table>
+        <tr>
+            <th>Course</th>
+            <th>Description</th>
+        </tr>
+        <tr ng-repeat="course in courses">
+            <td>{{ course.fields.subject[0] | limitTo :1 }}{{ course.fields.number | limitTo:3 }}</td>
+            <td>{{ course.fields.title }}</td>
+        </tr>
+    </table>
+</div>
+
+{% endverbatim %}
+</body>
+</html>
