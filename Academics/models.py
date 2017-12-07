@@ -104,7 +104,7 @@ class Instructor(Person):
             return '{0}, {1}'.format(self.last_name, self.first_name)
 
     def checkSelfConflicts(self, sections):
-        sections = self.assignments.all()
+        sections = self.section_set.all()
         n = sections.count()
         for i in range(n):
             for j in range(i+1, n):
@@ -1408,7 +1408,12 @@ class SectionPreference(models.Model):
 
     section = models.ForeignKey(Section)
     instructor = models.ForeignKey('Instructor')
-    preference = models.IntegerField(blank=True, null=True)
+    preference = models.IntegerField(blank=True, null=True, choices=(
+        (0, 'Impossible'),
+        (1, 'Possible'),
+        (2, 'Preferred'),
+        (3, 'Best'),
+    ))
     objects = SectionPreferenceManager()
 
     class Meta:
@@ -1417,6 +1422,10 @@ class SectionPreference(models.Model):
     def __unicode__(self):
         return '{0} {1}   {2}'.format(self.section.__unicode__(), self.instructor.__unicode__(), unicode(self.preference))
 
+    def get_absolute_url(self):
+        return "/PA/SectionPreference/%i/" % self.id
+        # from django.urls import reverse
+        # return reverse('people.views.details', args=[str(self.id)])
 
 class Position(models.Model):
 

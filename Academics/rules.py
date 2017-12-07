@@ -32,6 +32,6 @@ def is_instructor_of_section(user, section):
 def is_head_of_section_acad_org(user, section):
     return is_head_of_acad_org(user, section.session.course.subject.host)
 
-rules.add_perm('can_view_section_roster',
+rules.add_perm('Academics.can_view_section_roster',
                is_instructor_of_section | is_head_of_section_acad_org
                )

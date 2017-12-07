@@ -1,4 +1,14 @@
 from django import forms
+from django.forms import ModelForm, RadioSelect
+from .models import SectionPreference
+
+
+class SectionPreferenceForm(ModelForm):
+    class Meta:
+        model = SectionPreference
+        fields = ['section', 'preference']
+        #widgets = {'preference':RadioSelect(),}
+
 
 class LandingForm(forms.Form):
     name = forms.CharField()
