@@ -1,10 +1,15 @@
 from django.shortcuts import render
 from django.views import generic
+from django.forms import modelformset_factory, TextInput
 from .models import *
 from .forms import LandingForm, SectionPreferenceForm
 from django.views.generic.edit import UpdateView
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 
 from django.http import HttpResponse
+
+def isInstructor(user):
+    return user.has_perm('section_view')
 
 def index(request):
     env = request.environ
@@ -67,12 +72,40 @@ def SectionPreferenceFunctionView(request, pk):
 
     return render(request, 'academics/section_preference_form.html', pref)
 
-
+@login_required
+#@permission_required('Academics.view_section')
 def SectionPreferencesView(request, termNumber):
     print request.user.last_name
-    sectionPreferences = SectionPreference.objects.filter(
+    queryset = SectionPreference.objects.filter(
         section__session__term__number=termNumber,
         instructor__pk=request.user.pk,
-    )
-    context = {'sectionPreferences': sectionPreferences}
+    ).order_by('section__session__course__subject',
+               'section__session__course__number',
+               'section__number')
+    sectionsAsStudent = set(SectionStudent.objects.filter(student=request.user))
+    sectionsAsInstructor = set(Section.objects.filter(instructor=request.user))
+    print sectionsAsStudent.union(sectionsAsInstructor)
+    comments = []
+    for pref in queryset:
+        conflicts = set(list(pref.section.conflicts.all()))
+        print conflicts
+        conflictedSections = conflicts.intersection(sectionsAsStudent.union(sectionsAsInstructor))
+        print conflictedSections
+        if conflictedSections:
+            comment = 'Conflicts with {0}'.format(', '.join(conflictedSections))
+            pref.preference = 0
+            pref.save()
+        else:
+            comment = ''
+        comments.append(comment)
+
+    SectionPreferenceFormSet = modelformset_factory(SectionPreference,
+                                                    form=SectionPreferenceForm, extra=0,
+                                                    )
+    formset = SectionPreferenceFormSet(queryset=queryset)
+    for form, comment in zip(formset, comments):
+        print comment
+        if comment:
+            form.fields['preference'].widget.attrs['disabled']=True
+    context = {'formset': formset, 'zip':zip(formset.queryset, formset, comments), 'request':request}
     return render(request, 'academics/sectionPreferences.html', context)

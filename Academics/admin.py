@@ -46,9 +46,6 @@ class SectionStudentAdmin(ModelAdmin):
                 'student__first_name',
     )
 
-class InstructorAdmin(ModelAdmin):
-    ordering = ('last_name', 'first_name',)
-
 # class ExamScoreAdmin(ModelAdmin):
 #     ordering = ('student__last_ame','student__first_name',
 #                 'date', 'score'
@@ -82,7 +79,6 @@ admin.site.register(CourseType)
 admin.site.register(Prerequisite)
 admin.site.register(StudentGrade)
 admin.site.register(SectionPreference)
-admin.site.register(Instructor, InstructorAdmin)
 admin.site.register(TermInstructor)
 #admin.site.register(DegreeCourse)
 #admin.site.register(DegreeCourseGroup)

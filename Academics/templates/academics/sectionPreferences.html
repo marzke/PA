@@ -3,10 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>Section Preferences</title>
+    {{ formset.media }}
 </head>
 <body>
-    {%  for sp in sectionPreferences %}
-        {{ sp }}
+<form>
+
+<div class='menu-container'>
+
+    <div class='form-type'><h2>Section Preferences</h2></div>
+    <div class='name'><h2>{{ request.user.first_name }} {{ request.user.last_name }}</h2></div>
+
+    </div>
+<div class="inputs">
+
+{% load academicsTags %}
+    {% for pref,form, comment in zip %}
+        <div class="input">
+            <div class="section-info">
+                <div class="section-identifier">
+                    {{ pref.section.session.course.subject.name }}
+                    {{ pref.section.session.course.number }}.{{ pref.section.number }}
+                    {{  pref.section.session.course.title }}
+                </div>
+                <div class="section-time">
+                    {{ pref.section.meetDays | replace:'/R/TH'}}
+                    {{ pref.section.startTime }} - {{ pref.section.endTime }}
+                </div>
+            </div>
+            <div class="section-preferences-comments">
+                <div class="section-preferences">{{ form }}</div>
+                <div class="comments">{{ comment }}</div>
+            </div>
+        </div>
     {% endfor %}
+
+</form>
 </body>
 </html>

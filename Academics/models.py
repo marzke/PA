@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from .fields import *
 from django.db import connections
 from django.core.exceptions import ValidationError
@@ -16,6 +16,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
 
 class WeeklyEvent(models.Model):
 
@@ -50,11 +51,24 @@ class WeeklyEvent(models.Model):
         return '{0}  {1} - {2}'.format(self.day, self.startTime, self.endTime)
 
 
+class PersonManager(BaseUserManager):
+
+    def checkSelfConflicts(self):
+        for instructor in self.instructors:
+            conflict = instructor.checkSelfConflicts(self.sections)
+            if conflict:
+                print instructor, 'has self conflicts'
+
 
 class Person(AbstractUser):
 
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    preferences = models.ManyToManyField(
+        'Section', blank=True,
+        through='SectionPreference', related_name='requested_by'
+    )
+    objects = PersonManager()
 
     class Meta:
         verbose_name = 'person'
@@ -73,36 +87,6 @@ class Person(AbstractUser):
 # types of Person are determined by job classification
 # (or enrollment status in the case of a student)
 
-
-class InstructorManager(models.Manager):
-
-    def checkSelfConflicts(self):
-        for instructor in self.instructors:
-            conflict = instructor.checkSelfConflicts(self.sections)
-            if conflict:
-                print instructor, 'has self conflicts'
-
-
-class Instructor(Person):
-
-    class Meta:
-        verbose_name = 'instructor'
-        verbose_name_plural = 'instructors'
-
-    preferences = models.ManyToManyField(
-        'Section', blank=True,
-        through='SectionPreference', related_name='requested_by'
-    )
-    gta = models.NullBooleanField(blank=True, null=True)
-    priority = models.IntegerField(blank=True, null=True)
-    objects = InstructorManager()
-
-    def __unicode__(self):
-        if self.gta:
-            return '{0}, {1}  (GTA)'.format(self.last_name, self.first_name)
-        else:
-            return '{0}, {1}'.format(self.last_name, self.first_name)
-
     def checkSelfConflicts(self, sections):
         sections = self.section_set.all()
         n = sections.count()
@@ -117,6 +101,11 @@ class Instructor(Person):
 
 
 
+
+#class Instructor(Person):
+
+    #gta = models.NullBooleanField(blank=True, null=True)
+    #priority = models.IntegerField(blank=True, null=True)
 
 
 class Student(Person):
@@ -377,7 +366,7 @@ class Term(models.Model):
     number = models.CharField(max_length=4, unique=True)
     startDate = models.DateField(blank=True, null=True)
     endDate = models.DateField(blank=True, null=True)
-    instructors = models.ManyToManyField('Instructor', blank=True, through='TermInstructor')
+    instructors = models.ManyToManyField('Person', blank=True, through='TermInstructor')
     objects = TermManager()
 
     def _number(self):
@@ -640,7 +629,7 @@ class SectionManager(models.Manager):
             lastName, sectionName = re.search('x\$(.*)\$(\w*\.\w*)', line).groups()
             lastName = re.sub('_',' ',lastName)
             print lastName, sectionName[0:4],sectionName[4:8],sectionName[8:11],sectionName[12:14]
-            instructor = Instructor.objects.get(last_name=lastName)
+            instructor = Person.objects.get(last_name=lastName)
             section = self.get(
                 #instructor__last_name=lastName,
                 session__term__number=sectionName[0:4],
@@ -722,7 +711,8 @@ class Section(models.Model):
     classNumber = models.IntegerField()
     courseType = models.ForeignKey(CourseType)
     kFactor = models.ForeignKey(KFactor, blank=True, null=True)
-    instructor = models.ForeignKey(Instructor, blank=True, null=True)
+    instructor = models.ForeignKey(Person, blank=True, null=True,
+                                   related_name='sectionsAsInstructor')
     meetings = models.ManyToManyField(WeeklyEvent, blank=True)
     meetDays = models.CharField(max_length=32, blank=True, null=True)
     startTime = models.TimeField(blank=True, null=True)
@@ -1174,7 +1164,7 @@ class SectionStudent(models.Model):
 class TermInstructor(models.Model):
 
     term = models.ForeignKey(Term)
-    instructor = models.ForeignKey(Instructor)
+    instructor = models.ForeignKey(Person)
     requestedLoad = models.IntegerField(blank=True, null=True)
     approvedLoad = models.IntegerField(blank=True, null=True)
 
@@ -1186,6 +1176,7 @@ class TermInstructor(models.Model):
 class SectionPreferenceManager(models.Manager):
 
     def getPreferences(self, excelFile, only=''):
+        gtaGroup = Group.objects.get(name='GTA')
         sheet = pd.read_excel(excelFile, header=0)
         term = Term.objects.get(number='2177')
         ldLabSections = Section.objects.filter(
@@ -1227,16 +1218,17 @@ class SectionPreferenceManager(models.Manager):
             requestedLoad = sheet['Desired Load'][i]
             approvedLoad = sheet['Approved Load'][i]
             gta = instructorType == 'GTA'
-            instructor, new = Instructor.objects.get_or_create(
+            instructor, new = Person.objects.get_or_create(
                 username=emplid
             )
-            instructor.gta = gta
-            instructor.priority = instructorPriority
+            #instructor.gta = gta
+            instructor.groups.add(gtaGroup)
+            #instructor.priority = instructorPriority
             if new:
                 instructor.first_name = firstName
                 instructor.last_name = lastName
                 instructor.email = email
-                instructor.instructorType = instructorType
+                #instructor.instructorType = instructorType
             instructor.save()
             print instructor
             termInstructor, new = TermInstructor.objects.get_or_create(
@@ -1266,7 +1258,7 @@ class SectionPreferenceManager(models.Manager):
                     sectionPreference = SectionPreference.objects.create(
                         section=section, instructor=instructor, preference=preference
                     )
-                if preference != 0 and instructor.gta:
+                if preference != 0 and gtaGroup in instructor.groups.all():
                     for k in range(14):     # GTA's own class plans
                         attending = sheet.iloc[i][k+69]
                         gtaCourseName = sheet.columns[k+69]
@@ -1372,7 +1364,7 @@ class SectionPreferenceManager(models.Manager):
             instructor = sectionPreference.instructor
             lastName = re.sub('\s', '_', sectionPreference.instructor.last_name)
             print lastName
-            if instructor.priority == 2:
+            if True: #instructor.priority == 2:
                 iString = 'subto load_%s: forall <i> in {"%s"} do sum <s> in S: x[i,s] == L[i];\n' % (lastName, lastName)
             else:
                 iString = 'subto load%s: forall <i> in {"%s"} do sum <s> in S: x[i,s] <= L[i];\n' % (lastName, lastName)
@@ -1407,8 +1399,10 @@ class SectionPreferenceManager(models.Manager):
 class SectionPreference(models.Model):
 
     section = models.ForeignKey(Section)
-    instructor = models.ForeignKey('Instructor')
-    preference = models.IntegerField(blank=True, null=True, choices=(
+    instructor = models.ForeignKey('Person')
+    preference = models.IntegerField(default=0,
+        verbose_name='Section Preference',
+        choices=(
         (0, 'Impossible'),
         (1, 'Possible'),
         (2, 'Preferred'),
