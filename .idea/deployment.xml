@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="celiaPA" deleteMissingItems="true" traceLevel="DETAILS">
+    <serverData>
+      <paths name="celiaPA">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Library/WebServer/Documents/PA/" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/Library/WebServer/Documents/secure/static" local="$PROJECT_DIR$/../static" web="/static" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
