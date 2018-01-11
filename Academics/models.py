@@ -532,7 +532,7 @@ class SectionManager(models.Manager):
 
                 instructorExists = re.search('.', sectionParent.instructorID)
                 if instructorExists:
-                    instructor, new = Instructor.objects.get_or_create(
+                    instructor, new = Person.objects.get_or_create(
                         username=sectionParent.instructorID
                     )
                     if new:
@@ -564,31 +564,34 @@ class SectionManager(models.Manager):
                 #section.save()
 
                 days = re.findall('[MTWRF]', sectionParent.meetDays)
-                startTime = datetime.datetime.strptime(sectionParent.startTime,'%H:%M')
-                endTime = datetime.datetime.strptime(sectionParent.endTime,'%H:%M')
-                date = endTime.date()
-                earliestStart = datetime.datetime.combine(date, datetime.time(hour=8))
-                earliestEnd = datetime.datetime.combine(date, datetime.time(hour=9, minute=45))
-                if startTime < earliestStart:
-                    startTime += datetime.timedelta(hours=12)
-                if endTime < earliestEnd:
-                    endTime += datetime.timedelta(hours=12)
-                for day in days:
-                    meeting, new = WeeklyEvent.objects.get_or_create(
-                        day=day,
-                        startTime=startTime.time(),
-                        endTime=endTime.time()
-                    )
-                    #print day, startTime, endTime
-                    #print meeting
-                    #print section.meetings
-                    section.meetings.add(meeting)
+                try:
+                    startTime = datetime.datetime.strptime(sectionParent.startTime,'%H:%M')
+                    endTime = datetime.datetime.strptime(sectionParent.endTime,'%H:%M')
+                    date = endTime.date()
+                    earliestStart = datetime.datetime.combine(date, datetime.time(hour=8))
+                    earliestEnd = datetime.datetime.combine(date, datetime.time(hour=9, minute=45))
+                    if startTime < earliestStart:
+                        startTime += datetime.timedelta(hours=12)
+                    if endTime < earliestEnd:
+                        endTime += datetime.timedelta(hours=12)
+                    for day in days:
+                        meeting, new = WeeklyEvent.objects.get_or_create(
+                            day=day,
+                            startTime=startTime.time(),
+                            endTime=endTime.time()
+                        )
+                        print day, startTime, endTime
+                        #print meeting
+                        #print section.meetings
+                        section.meetings.add(meeting)
+                except:
+                    print 'No scheduled meeting time'
 
                 if sectionParent.meetDays is not None and re.match('.', sectionParent.meetDays):
                     section.meetDays = sectionParent.meetDays
-                if sectionParent.startTime is not None:
+                if sectionParent.startTime is not None and re.match('.', sectionParent.startTime):
                     section.startTime = startTime
-                if sectionParent.endTime is not None:
+                if sectionParent.endTime is not None and re.match('.', sectionParent.endTime):
                     section.endTime = endTime
                 if re.match('.', sectionParent.building) and re.match('.', sectionParent.room):
                     section.room = sectionParent.building.strip() + sectionParent.room.strip()
