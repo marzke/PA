@@ -87,10 +87,10 @@ class GradeField(models.Field):
             return Grade(value)
 
     def get_prep_value(self, value):
-        print type(value)
-        print "value = ", value
+        #print type(value)
+        #print "value = ", value
         if isinstance(value, Grade):
-            print 'in get prep value'
+            #print 'in get prep value'
             return value.letterGrade
         else:
             return ''

@@ -108,6 +108,27 @@ class Person(AbstractUser):
     #priority = models.IntegerField(blank=True, null=True)
 
 
+class StudentManager(models.Manager):
+
+    def get_or_create_with_person(self, **kwargs):
+        newStudent = False
+        newPerson = False
+        try:
+            student = self.get(username=kwargs['username'])
+        except:
+            newStudent = True
+            try:
+                student = self.create(**kwargs)
+                student.save()
+            except:
+                newPerson = True
+                person = Person.objects.get(username=kwargs['username'])
+                student = self.create(person_ptr=person, level=kwargs['level'])
+                student.__dict__.update(person.__dict__)
+                student.save()
+        return (student, newStudent, newPerson,)
+
+
 class Student(Person):
 
     class Meta:
@@ -115,6 +136,7 @@ class Student(Person):
         verbose_name_plural = 'students'
 
     #degreeProgram = models.ManyToManyField('DegreeProgram')
+    objects = StudentManager()
     level = models.CharField(max_length=16, choices=(
         ('Freshman', 'Freshman'),
         ('Sophomore','Sophomore'),
@@ -600,8 +622,9 @@ class SectionManager(models.Manager):
                 section.waitCap = sectionParent.waitCap
                 section.save()
 
-    def getConflicts(self):
-        sections = Section.objects.all().prefetch_related('meetings').order_by(
+    def getConflicts(self, termNumber=''):
+        sections = Section.objects.filter(session__term__number=termNumber).exclude(
+            courseType__name='SUP').prefetch_related('meetings').order_by(
             'session__term__number','session__course__subject__name',
             'session__course__number', 'number'
         )
@@ -612,7 +635,7 @@ class SectionManager(models.Manager):
                     print sections[i], ' conflicts with ', sections[j]
                     sections[i].conflicts.add(sections[j])
 
-    def getLDLabSections(self, termNumber):
+    def getLDLabSections(self, termNumber=''):
         return Section.objects.filter(
             session__term__number=termNumber,
             session__course__number__lt=300,
@@ -624,7 +647,7 @@ class SectionManager(models.Manager):
             'session__course__number', 'number'
         )
 
-    def getSCIPSectionAssignments(self, file):
+    def getSCIPSectionAssignments(self, file=''):
         scipSol = open(file, 'r')
         for line in scipSol:
             if not re.match('^x\$', line):
@@ -797,20 +820,30 @@ class SectionStudentParent(models.Model):
 
     # from view that includes SFO_CR_ENROLL_VW and SFO_CR_MAIN_VW (for user info)
 
-    section = models.CharField(max_length=4, db_column='STRM')
+    sectionid = models.IntegerField(db_column='ID')
+    strm = models.CharField(max_length=4, db_column='STRM')
     classNumber = models.IntegerField(db_column='CLASS_NBR')
+    status = models.CharField(max_length=8, db_column='STATUS')
+    enrolledStatus = models.CharField(max_length=8, db_column='ENROLLED_STATUS')
     subject = models.CharField(max_length=8, db_column='SUBJECT')
     catalogNumber = models.CharField(max_length=10, db_column='CATALOG_NBR')
+    sessionCode = models.CharField(max_length=3, db_column='SESSION_CODE')
     classSection = models.CharField(max_length=4, db_column='CLASS_SECTION')
     username = models.CharField(max_length=11, db_column='EMPLID')
     first_name = models.CharField(max_length=30, db_column='FIRST_NAME')
     last_name = models.CharField(max_length=30, db_column='LAST_NAME')
     email = models.CharField(max_length=40, db_column='EMAIL_ADDR')
-    status = models.CharField(max_length=8, db_column='ENROLLED_STATUS')
+    academicPlan = models.CharField(max_length=10, db_column='ACAD_PLAN')
+    academicPlanDescription = models.CharField(max_length=30, db_column='DESCR')
+    academicLevel = models.CharField(max_length=3, db_column='ACAD_LEVEL_BOT')
+    classLevel = models.CharField(max_length=10, db_column='CLASS_LEVEL')
+    permissionNumberUsed = models.CharField(max_length=1, db_column='PERMISSION_NBR_USED')
+    gradingBasisEnroll = models.CharField(max_length=3, db_column='GRADING_BASIS_ENRL')
+    officialCourseGrade = models.CharField(max_length=3, db_column='CRSE_GRADE_OFF')
 
     class Meta:
         managed = False
-        db_table = 'PA_ENROLL_SPRING2017_VW'
+        db_table = 'ENROLL_VW'
 
     def __unicode__(self):
         return "{0} {1}{2}.{3}   {4} {5},{6}".format(
@@ -830,48 +863,68 @@ class SectionStudentManager(models.Manager):
         parents = SectionStudentParent.objects.all()
 
         for parent in parents:
+            print parent.strm, parent.subject, parent.catalogNumber, parent.classSection, \
+                parent.username, parent.first_name, parent.last_name, parent.enrolledStatus
             try:
                 sectionStudent = self.get(
-                    section__session__term__number=parent.strm,
-                    section__classNumber=parent.classNumber,
-                    student__username=parent.username,
-                    status=parent.status
+                    section__session__term__number=parent.strm.strip(),
+                    section__classNumber=parent.classNumber.strip(),
+                    student__username=parent.emplid.strip(),
+                    #status=parent.status
                 )
             except:
-                term, new = Term.objects.get_or_create(number=parent.strm)
-                course, new = Course.get_or_create(
-                    subject=parent.subject,
-                    catalogNumber=parent.catalogNumber,
+                term, new = Term.objects.get_or_create(number=parent.strm.strip())
+                course, new = Course.objects.get_or_create(
+                    subject__name=parent.subject.strip(),
+                    number=parent.catalogNumber.strip(),
                 )
-                session, new = Session(term=term, course=course)
+                session, new = Session.objects.get_or_create(
+                    term=term, course=course
+                )
                 section, new = Section.objects.get_or_create(
                     session=session, number=parent.classSection
                 )
-                student, new = Student.objects.get_or_create(username=parent.username)
-                student.first_name = parent.first_name
-                student.last_name = parent.last_name
-                student.email = parent.email
-            sectionStudent, new = self.get_or_create(
-                section=section, student=student, status=enrolled_status
-            )
-            student.class_level = class_level
-            degreeProgram = DegreeProgram.objects.get(name=acad_plan)
-            student.degreeProgram.add(degreeProgram)
-            student.save()
-        if re.search('\d+', permission_nbr_used):
-            sectionStudent.permissionNumber = int(permission_nbr_used)
-        else:
-            sectionStudent.permissionNumber = None
-        if crse_grade_off:
-            sectionStudent.grade = Grade(crse_grade_off.strip())
-        sectionStudent.save()
+                student, newStudent, newPerson = Student.objects.get_or_create_with_person(
+                    username=parent.username.strip(),
+                    first_name=parent.first_name.strip(),
+                    last_name=parent.last_name.strip(),
+                    email=parent.email.strip(),
+                    level=parent.classLevel.strip()
+                )
+                sectionStudent, new = self.get_or_create(
+                    section=section, student=student
+                )
+            # Reset student info in case it changes (except for SFSU ID)
+            sectionStudent.student.first_name = parent.first_name.strip()
+            sectionStudent.student.last_name = parent.last_name.strip()
+            sectionStudent.student.email = parent.email.strip()
+            sectionStudent.student.level = parent.classLevel.strip()
+            #degreeProgram = DegreeProgram.objects.get(name=parent.academicPlan)
+            #student.degreeProgram.add(degreeProgram)
+            sectionStudent.student.save()
+            sectionStudent.status = parent.enrolledStatus.strip()
+            # if re.search('\d+', parent.permissionNumberUsed):
+            #     sectionStudent.permissionNumber = parent.permissionNumberUsed
+            # else:
+            #     sectionStudent.permissionNumber = None
+            if parent.officialCourseGrade:
+                grade = Grade(parent.officialCourseGrade.strip())
+                if sectionStudent.grade != grade:
+                    sectionStudent.grade = grade
+                    studentGrade, new = StudentGrade.objects.get_or_create(
+                        course=sectionStudent.section.session.course,
+                        student=sectionStudent.student
+                    )
+                    studentGrade.grade = sectionStudent.grade
+                    studentGrade.save()
+            sectionStudent.save()
 
 class SectionStudent(models.Model):
     section = models.ForeignKey(Section)
     student = models.ForeignKey(Student)
     status = models.CharField(max_length=32, choices=(
         ('ENROLLED', 'Enrolled'),
-        ('WAITLISTED', 'Waitlisted'),
+        ('WAITLIST', 'Waitlisted'),
         ('UNREGISTERED', 'Unregistered'),
         ('DROPPED', 'Dropped'),
     ))
