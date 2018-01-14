@@ -499,7 +499,7 @@ class SectionParent(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'SECTION_VW'
+        db_table = 'SECTION'
 
     def __unicode__(self):
         return "{0} {1}{2}.{3}".format(self.strm, self.subject,
@@ -843,7 +843,7 @@ class SectionStudentParent(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'ENROLL_VW'
+        db_table = 'ENROLL'
 
     def __unicode__(self):
         return "{0} {1}{2}.{3}   {4} {5},{6}".format(
@@ -1214,6 +1214,19 @@ class SectionStudent(models.Model):
 #                                             self.lastName,
 #                                             self.progress)
 
+class TermInstructorManager(models.Manager):
+
+    def propagateInstructorsToTerm(self, termNumber=''):
+        try:
+            term = Term.objects.get(number=termNumber)
+        except:
+            return False
+        for termInstructor in self.all():
+            instructor = termInstructor.instructor
+            propagated, new = self.get_or_create(instructor=instructor, term=term)
+            if new:
+                print propagated
+        return True
 
 
 
@@ -1223,6 +1236,7 @@ class TermInstructor(models.Model):
     instructor = models.ForeignKey(Person)
     requestedLoad = models.IntegerField(blank=True, null=True)
     approvedLoad = models.IntegerField(blank=True, null=True)
+    objects = TermInstructorManager()
 
     def __unicode__(self):
         return '{0}  {1} {2}'.format(self.term.number, self.instructor.first_name,
