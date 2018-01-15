@@ -1,3 +1,4 @@
+create table ENROLL as
 select to_number(concat(e.STRM, e.CLASS_NBR)) as id, e.status, e.enrolled_status,
 		m.strm, m.class_nbr, m.subject, m.catalog_nbr, m.session_code, m.class_section, 
 		m.emplid, m.first_name, m.last_name, m.email_addr, m.acad_plan, m.descr, m.acad_level_bot,

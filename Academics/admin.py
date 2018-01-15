@@ -6,14 +6,17 @@ from Academics.models import *
 class PersonAdmin(ModelAdmin):
     ordering = ('last_name', 'first_name',)
 
+class AcademicOrganizationAdmin(ModelAdmin):
+    ordering = ('databaseColumnName',)
+
 class CollegeAdmin(ModelAdmin):
     ordering = ('name',)
 
 class DepartmentAdmin(ModelAdmin):
-    ordering = ('description',)
+    ordering = ('name',)
 
 class ProgramAdmin(ModelAdmin):
-    ordering = ('description',)
+    ordering = ('name',)
 
 class KFactorAdmin(ModelAdmin):
     ordering = ('minCSNumber',)
@@ -41,6 +44,14 @@ class StudentAdmin(ModelAdmin):
     ordering = ('last_name','first_name',)
     list_display = ('last_name', 'first_name', 'username',)
 
+class GTAAdmin(ModelAdmin):
+    ordering = ('last_name', 'first_name',)
+    list_display = ('last_name', 'first_name', 'username',)
+
+class LecturerAdmin(ModelAdmin):
+    ordering = ('last_name','first_name',)
+    list_display = ('last_name', 'first_name', 'username',)
+
 class SectionStudentAdmin(ModelAdmin):
     ordering = ('student__last_name',
                 'student__first_name',
@@ -59,6 +70,8 @@ admin.site.register(WeeklyEvent)
 admin.site.register(Person, PersonAdmin)
 #admin.site.register(Professor)
 admin.site.register(Student, StudentAdmin)
+admin.site.register(Lecturer, LecturerAdmin)
+admin.site.register(GTA, GTAAdmin)
 admin.site.register(AcademicOrganization)
 admin.site.register(AcademicGroup)
 admin.site.register(Department, DepartmentAdmin)
@@ -82,4 +95,4 @@ admin.site.register(SectionPreference)
 admin.site.register(TermInstructor)
 #admin.site.register(DegreeCourse)
 #admin.site.register(DegreeCourseGroup)
-#admin.site.register(DegreeProgram)
+admin.site.register(Degree)

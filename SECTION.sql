@@ -1,3 +1,4 @@
+create table SECTION as
 select to_number(concat(t.STRM, t.CLASS_NBR)) as id,
 		t.strm, t.class_nbr, t.CRSE_ID, t.subject, t.catalog_nbr, t.CLASS_SECTION, t.descr, t.SESSION_CODE,
 		i.units_acad_prog, i.SSR_COMPONENT, i.meeting_days, i.start_time, i.end_time, i.start_date, i.end_date,

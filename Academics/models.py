@@ -53,11 +53,11 @@ class WeeklyEvent(models.Model):
 
 class PersonManager(BaseUserManager):
 
-    def checkSelfConflicts(self):
-        for instructor in self.instructors:
-            conflict = instructor.checkSelfConflicts(self.sections)
+    def checkSelfConflicts(self, termNumber=''):
+        for person in self.all():
+            conflict = person.checkSelfConflicts(termNumber)
             if conflict:
-                print instructor, 'has self conflicts'
+                print person, 'has self conflicts'
 
 
 class Person(AbstractUser):
@@ -87,14 +87,24 @@ class Person(AbstractUser):
 # types of Person are determined by job classification
 # (or enrollment status in the case of a student)
 
-    def checkSelfConflicts(self, sections):
-        sections = self.section_set.all()
+    def conflictsWith(self, section=None):
+        if section:
+            termNumber = section.session.term.number
+            commitments = self.section_set.filter(session__term__number=termNumber)
+            for commitment in commitments:
+                conflict = commitment.conflictsWith(section)
+                if conflict:
+                    return True
+        return False
+
+    def checkSelfConflicts(self, termNumber=''):
+        sections = self.section_set.filter(session__term__number=termNumber)
         n = sections.count()
         for i in range(n):
             for j in range(i+1, n):
                 conflict = sections[i].conflictsWith(sections[j])
                 if conflict:
-                    print self.name, sections[i], sections[j]
+                    print self.first_name, self.last_name, sections[i], sections[j]
                     return True
         return False
 
@@ -108,11 +118,11 @@ class Person(AbstractUser):
     #priority = models.IntegerField(blank=True, null=True)
 
 
-class StudentManager(models.Manager):
+class StudentManager(PersonManager):
 
     def get_or_create_with_person(self, **kwargs):
         newStudent = False
-        newPerson = False
+        oldPerson = False
         try:
             student = self.get(username=kwargs['username'])
         except:
@@ -121,12 +131,12 @@ class StudentManager(models.Manager):
                 student = self.create(**kwargs)
                 student.save()
             except:
-                newPerson = True
+                oldPerson = True
                 person = Person.objects.get(username=kwargs['username'])
                 student = self.create(person_ptr=person, level=kwargs['level'])
                 student.__dict__.update(person.__dict__)
                 student.save()
-        return (student, newStudent, newPerson,)
+        return (student, newStudent, oldPerson,)
 
 
 class Student(Person):
@@ -146,14 +156,62 @@ class Student(Person):
         ('Graduate', 'Graduate'),
     ))
 
-# class Lecturer(Instructor):
-#
-#     class Meta:
-#         verbose_name = 'lecturer'
-#         verbose_name_plural = 'lecturers'
-#
-#     subjects = models.ManyToManyField('Subject', blank=False)
-#     courses = models.ManyToManyField('Course', blank=True)
+
+class EmployeeParent(models.Model):
+
+    emplid = models.CharField(max_length=11, db_column='EMPLID', primary_key=True)
+    firstName = models.CharField(max_length=30, db_column='FIRST_NAME')
+    lastName = models.CharField(max_length=30, db_column='LAST_NAME')
+    emailAddress = models.CharField(max_length=30, db_column='EMAIL_ADDR')
+    jobCode = models.CharField(max_length=128, db_column='JOB_CODE')
+    jobDescription = models.CharField(max_length=128, db_column='JOB_DESCRIPTION')
+    jobAbbreviation = models.CharField(max_length=128, db_column='JOB_ABBR')
+    jobFunction = models.CharField(max_length=128, db_column='JOB_FUNCTION')
+    jobTitle = models.CharField(max_length=128, db_column='JOB_TITLE')
+    jobGrade = models.CharField(max_length=128, db_column='JOB_GRADE')
+
+    class Meta:
+        managed = False
+        db_table = 'EMPLOYEE'
+
+    def __unicode__(self):
+        return '{0}  {1}  {2} {3}'.format(
+            self.emplid, self.firstName, self.lastName, self.jobDescription,
+        )
+
+
+class LecturerManager(PersonManager):
+
+    def create_from_parent_employees(self):
+        pLecturers = EmployeeParent.objects.filter(jobFunction__contains='LEC')
+        for pLecturer in pLecturers:
+            newLecturer = False
+            oldPerson = False
+            try:
+                lecturer = self.get(username=pLecturer.emplid)
+            except:
+                newLecturer = True
+                try:
+                    lecturer = self.create(**kwargs)
+                    lecturer.save()
+                except:
+                    oldPerson = True
+                    person = Person.objects.get(username=pLecturer.emplid)
+                    lecturer = self.create(person_ptr=person)
+                    lecturer.__dict__.update(person.__dict__)
+                    lecturer.save()
+
+
+class Lecturer(Person):
+
+    subjects = models.ManyToManyField('Subject')
+    courses = models.ManyToManyField('Course')
+    objects = LecturerManager()
+
+    class Meta:
+        verbose_name = 'lecturer'
+        verbose_name_plural = 'lecturers'
+
 
 # class Professor(Instructor):
 #
@@ -178,15 +236,72 @@ class Student(Person):
 #     #department = models.ManyToManyField('Department')
 #     title = models.CharField(max_length=128, blank=True, null=True)
 
-# class GTA(Instructor):
-#
-#     #student = models.OneToOneField(Student)
-#
-#     class Meta:
-#         verbose_name = 'GTA'
-#         verbose_name_plural = 'GTAs'
-#
-#
+
+class GTAParent(models.Model):
+
+    emplid = models.CharField(max_length=11, db_column='EMPLID', primary_key=True)
+    firstName = models.CharField(max_length=30, db_column='FIRST_NAME')
+    lastName = models.CharField(max_length=30, db_column='LAST_NAME')
+    emailAddress = models.CharField(max_length=30, db_column='EMAIL_ADDR')
+    lastRegisteredTerm = models.CharField(max_length=4, db_column='STRM')
+    cumulativeGPA = models.DecimalField(max_digits=4, decimal_places=2, db_column='CUM_GPA')
+
+    class Meta:
+        managed = False
+        db_table = 'GTA'
+
+    def __unicode__(self):
+        return '{0}  {1}  {2} {3} {4}'.format(
+            self.emplid, self.firstName, self.lastName, self.cumulativeGPA,
+            self.lastRegisteredTerm
+        )
+
+
+class GTAManager(StudentManager):
+
+    def get_or_create_with_student(self, **kwargs):
+        newGTA = False
+        oldStudent = False
+        try:
+            gta = self.get(username=kwargs['username'])
+        except:
+            newGTA = True
+            try:
+                gta = self.create(**kwargs)
+                gta.save()
+            except:
+                oldStudent = True
+                student = Student.objects.get(username=kwargs['username'])
+                gta = self.create(student_ptr=student, gpa=kwargs['gpa'])
+                gta.__dict__.update(student.__dict__)
+                gta.save()
+        return (gta, newGTA, oldStudent,)
+
+    def update(self):
+        parents = GTAParent.objects.all()
+        for parent in parents:
+            gta, newGTA, oldStudent = self.get_or_create_with_student(
+                username=parent.emplid,
+                first_name=parent.firstName,
+                last_name=parent.lastName,
+                email=parent.emailAddress,
+                gpa=parent.cumulativeGPA
+            )
+            print gta, newGTA, oldStudent
+
+
+class GTA(Student):
+
+    gpa = models.DecimalField(max_digits=4, decimal_places=2, null=True)
+    objects = GTAManager()
+
+    class Meta:
+        verbose_name = 'GTA'
+        verbose_name_plural = 'GTAs'
+
+
+
+
 
 class AcademicGroup(models.Model):
     name = models.CharField(max_length=30)
@@ -199,13 +314,13 @@ class AcademicGroup(models.Model):
 
 
 class AcademicOrganization(models.Model):
-    name = models.CharField(max_length=30)
-    databaseColumnName = models.CharField(max_length=10)
-    description = models.CharField(max_length=60, blank=True, null=True)
+    name = models.CharField(max_length=128, blank=True, null=True)
+    databaseColumnName = models.CharField(max_length=10, unique=True)
+    #description = models.CharField(max_length=60, blank=True, null=True)
     admins = models.ManyToManyField(Person, related_name='academic_orgs_as_admin', blank=True)
 
     def __unicode__(self):
-        return self.description
+        return self.databaseColumnName
 
 
 class College(AcademicGroup):
@@ -805,6 +920,10 @@ class Section(models.Model):
 
     def conflictsWith(self, other):
         if isinstance(other, Section):
+            if self == other:
+                return False
+            if self.session.term != other.session.term:
+                return False
             if self.meetings.all().count() == 0 or other.meetings.all().count() == 0:
                 return False
             for meeting1 in self.meetings.all():
@@ -884,7 +1003,7 @@ class SectionStudentManager(models.Manager):
                 section, new = Section.objects.get_or_create(
                     session=session, number=parent.classSection
                 )
-                student, newStudent, newPerson = Student.objects.get_or_create_with_person(
+                student, newStudent, oldPerson = Student.objects.get_or_create_with_person(
                     username=parent.username.strip(),
                     first_name=parent.first_name.strip(),
                     last_name=parent.last_name.strip(),
@@ -1076,28 +1195,77 @@ class SectionStudent(models.Model):
 #         return False
 
 
-# class DegreeProgramManager(Importer):
-#
-#     def importExternal(self):
-#         self.sql = 'SELECT UNIQUE acad_plan, descr FROM cmscommon.SFO_CR_MAIN_MV ORDER BY acad_plan'
-#         for acad_plan, descr in self.lookup():
-#             degreeProgram, new = self.get_or_create(
-#                 name=acad_plan, description=descr
-#             )
-#             print degreeProgram, new
-#
+class DegreeStudentParent(models.Model):
 
-# class DegreeProgram(models.Model):
-#
-#     name = models.CharField(max_length=32)
-#     description = models.CharField(max_length=128)
-#     requiredCourses = models.ManyToManyField(Course, blank=True)
-#
-# #    objects = DegreeProgramManager()
-#
-#     def __unicode__(self):
-#         return "{0}:   {1}".format(self.name, self.description)
-#
+    id = models.CharField(max_length=21, db_column='ID', primary_key=True)
+    emplid = models.CharField(max_length=11, db_column='EMPLID')
+    academicCareer = models.CharField(max_length=4, db_column='acad_career')
+    studentCareerNumber = models.IntegerField(db_column='STDNT_CAR_NBR')
+    effectiveDate = models.DateTimeField(db_column='EFFDT')
+    effectiveSequence = models.IntegerField(db_column='EFFSEQ')
+    academicPlan = models.CharField(max_length=10, db_column='ACAD_PLAN')
+    declareDate = models.DateTimeField(db_column='DECLARE_DT')
+    planSequenceNumber = models.IntegerField(db_column='PLAN_SEQUENCE')
+    reqTerm = models.CharField(max_length=4, db_column='REQ_TERM')
+    completionTerm = models.CharField(max_length=4, db_column='COMPLETION_TERM')
+    studentDegreeNumber = models.CharField(max_length=2, db_column='STDNT_DEGR')
+    degreeCheckoutStatus = models.CharField(max_length=2, db_column='DEGR_CHKOUT_STAT')
+
+    class Meta:
+        managed = False
+        db_table = 'DEGREE_STUDENT'
+
+
+#class DegreeStudent(models.Model):
+
+
+class DegreeParent(models.Model):
+
+    academicPlan = models.CharField(max_length=10, db_column='ACAD_PLAN', primary_key=True)
+    academicOrganization = models.CharField(max_length=10, db_column='ACAD_ORG')
+    dateCreated = models.DateTimeField(blank=True, null=True, db_column='DATE_CREATED')
+    dateModified = models.DateTimeField(blank=True, null=True, db_column='LAST_MODIFIED')
+
+    class Meta:
+        managed = False
+        db_table = 'DEGREE'
+
+    def __unicode__(self):
+        return self.academicPlan
+
+
+class DegreeManager(models.Manager):
+
+    def sync(self):
+        for parent in DegreeParent.objects.all():
+            degree, new = self.get_or_create(academicPlan=parent.academicPlan)
+            if new:
+                acadOrg, new = AcademicOrganization.objects.get_or_create(
+                    databaseColumnName = parent.academicOrganization
+                )
+                degree.name = 'Degree'
+                degree.academicOrganization = acadOrg
+                degree.dateCreated = parent.dateCreated
+                degree.dateModified = parent.dateModified
+
+
+class Degree(models.Model):
+
+    name = models.CharField(blank=True, null=True, max_length=128)
+    academicPlan = models.CharField(max_length=10, unique=True, primary_key=True)
+    academicOrganization = models.ForeignKey(AcademicOrganization, null=True)
+    dateCreated = models.DateTimeField(null=True)
+    dateModified = models.DateTimeField(null=True)
+    objects = DegreeManager()
+    #requiredCourses = models.ManyToManyField(Course, blank=True)
+
+    def __unicode__(self):
+        return "{0} {1}".format(self.name, self.academicOrganization)
+
+
+
+
+
 # class AleksClass(models.Model):
 #
 #     site = 'https://www.aleks.com'
