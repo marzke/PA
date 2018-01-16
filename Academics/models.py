@@ -180,6 +180,25 @@ class EmployeeParent(models.Model):
         )
 
 
+class InstructorParent(models.Model):
+
+    emplid = models.CharField(max_length=11, db_column='EMPLID', primary_key=True)
+    first_name = models.CharField(max_length=30, db_column='FIRST_NAME')
+    last_name = models.CharField(max_length=30, db_column='LAST_NAME')
+    emailAddress = models.CharField(max_length=30, db_column='EMAIL_ADDR')
+    job = models.CharField(max_length=3, db_column='JOB')
+    desiredLoad = models.IntegerField(db_column='DESIRED_LOAD')
+    approvedLoad = models.IntegerField(db_column='APPROVED_LOAD')
+
+    class Meta:
+        managed = False
+        db_table = 'INSTRUCTORS_SPRING2018'
+
+    def __unicode__(self):
+        return '{0}  {1}  {2} {3}'.format(
+            self.emplid, self.first_name, self.last_name, self.job,
+        )
+
 class LecturerManager(PersonManager):
 
     def create_from_parent_employees(self):
@@ -200,6 +219,17 @@ class LecturerManager(PersonManager):
                     lecturer = self.create(person_ptr=person)
                     lecturer.__dict__.update(person.__dict__)
                     lecturer.save()
+
+    def update_from_instructor_table(self):
+        parents = InstructorParent.objects.filter(job='LEC')
+        for parent in parents:
+            lec, newLEC, oldPerson = self.get_or_create_with_person(
+                username=parent.emplid,
+                first_name=parent.first_name,
+                last_name=parent.last_name,
+                email=parent.emailAddress,
+            )
+            print lec, newLEC, oldPerson
 
 
 class Lecturer(Person):
@@ -277,7 +307,7 @@ class GTAManager(StudentManager):
                 gta.save()
         return (gta, newGTA, oldStudent,)
 
-    def update(self):
+    def update_from_employee_table(self):
         parents = GTAParent.objects.all()
         for parent in parents:
             gta, newGTA, oldStudent = self.get_or_create_with_student(
@@ -289,6 +319,16 @@ class GTAManager(StudentManager):
             )
             print gta, newGTA, oldStudent
 
+    def update_from_instructor_table(self):
+        parents = InstructorParent.objects.filter(job='GTA')
+        for parent in parents:
+            gta, newGTA, oldStudent = self.get_or_create_with_student(
+                username=parent.emplid,
+                first_name=parent.first_name,
+                last_name=parent.last_name,
+                email=parent.emailAddress,
+            )
+            print gta, newGTA, oldStudent
 
 class GTA(Student):
 
