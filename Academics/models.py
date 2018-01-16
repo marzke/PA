@@ -201,6 +201,24 @@ class InstructorParent(models.Model):
 
 class LecturerManager(PersonManager):
 
+    def get_or_create_with_person(self, **kwargs):
+        newLecturer = False
+        oldPerson = False
+        try:
+            lecturer = self.get(username=kwargs['username'])
+        except:
+            newLecturer = True
+            try:
+                lecturer = self.create(**kwargs)
+                lecturer.save()
+            except:
+                oldPerson = True
+                person = Person.objects.get(username=kwargs['username'])
+                lecturer = self.create(person_ptr=person)
+                lecturer.__dict__.update(person.__dict__)
+                lecturer.save()
+        return (lecturer, newLecturer, oldPerson,)
+
     def create_from_parent_employees(self):
         pLecturers = EmployeeParent.objects.filter(jobFunction__contains='LEC')
         for pLecturer in pLecturers:
