@@ -1,10 +1,11 @@
 import datetime
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from .fields import *
 from django.db import connections
 from django.core.exceptions import ValidationError
+from django.db.models.query import QuerySet
 import re
 import datetime
 import pandas as pd
@@ -55,7 +56,7 @@ class PersonManager(BaseUserManager):
 
     def checkSelfConflicts(self, termNumber=''):
         for person in self.all():
-            conflict = person.checkSelfConflicts(termNumber)
+            conflict = person.checkSelfConflicts(termNumber=termNumber)
             if conflict:
                 print person, 'has self conflicts'
 
@@ -88,23 +89,57 @@ class Person(AbstractUser):
 # (or enrollment status in the case of a student)
 
     def conflictsWith(self, section=None):
-        if section:
-            termNumber = section.session.term.number
-            commitments = self.section_set.filter(session__term__number=termNumber)
-            for commitment in commitments:
-                conflict = commitment.conflictsWith(section)
-                if conflict:
-                    return True
+        if not section:
+            return False
+        try:
+            sectionsAsStudent = list(self.student.section_set.filter(
+                session__term__number=section.session.term.number
+            ))
+        except:
+            sectionsAsStudent = []
+        try:
+            sectionsAsInstructor = list(self.sectionsAsInstructor.filter(
+                session__term__number=section.session.term.number
+            ))
+        except:
+            sectionsAsInstructor = []
+        #print sectionsAsStudent
+        #print sectionsAsInstructor
+        commitments = sectionsAsStudent + sectionsAsInstructor
+        #print commitments
+        for commitment in commitments:
+            #print 'testing ', commitment, section
+            conflict = commitment.conflictsWith(section)
+            if conflict:
+                #print 'CONFLICT'
+                return True
         return False
 
+
+    # need to try section_set (for students) AND sectionsAsInstructor (for students and lecturers)
+
     def checkSelfConflicts(self, termNumber=''):
-        sections = self.section_set.filter(session__term__number=termNumber)
-        n = sections.count()
+
+        try:
+            sectionsAsStudent = list(self.student_ptr.section_set.filter(
+                session__term__number=termNumber
+            ))
+        except:
+            sectionsAsStudent = []
+        try:
+            sectionsAsInstructor = list(self.sectionsAsInstructor.filter(
+                session__term__number=termNumber
+            ))
+        except:
+            sectionsAsInstructor = []
+        sections = sectionsAsStudent + sectionsAsInstructor
+        #print self.__unicode__(), sections
+        n = len(sections)
         for i in range(n):
             for j in range(i+1, n):
                 conflict = sections[i].conflictsWith(sections[j])
                 if conflict:
-                    print self.first_name, self.last_name, sections[i], sections[j]
+                    print i, j, self.first_name, self.last_name, sections[i], sections[j]
                     return True
         return False
 
@@ -593,18 +628,20 @@ class SessionManager(models.Manager):
                     course__number=courseNumber.strip()
                 )
             except:
-                term = Term.objects.get_or_create_from_number(parent.strm.strip())
+                term, new = Term.objects.get_or_create_from_number(parent.strm.strip())
                 print term
-                subject = Subject.objects.get_or_create(name=parent.subject.strip())
+                subject, new = Subject.objects.get_or_create(name=parent.subject.strip())
                 print subject
-                course = Course.objects.get_or_create(
-                    subject=parent.subject,
+                course, new = Course.objects.get_or_create(
+                    subject=subject,
                     number=parent.catalogNumber.strip()
                 )
                 print course
-                session = self.create(term=term, course=course)
-                session.save()
-            print session
+                session, new = self.get_or_create(term=term, course=course)
+                if new:
+                    print session, ' NEW'
+                else:
+                    print session
 
 
 class Session(models.Model):
@@ -820,6 +857,18 @@ class SectionManager(models.Manager):
             'session__course__number', 'number'
         )
 
+    def getUDGradSections(self, termNumber=''):
+        return Section.objects.filter(
+            session__term__number=termNumber,
+            session__course__number__ge=330
+        ).exclude(
+            number__contains='Z',
+            courseType__name='SUP'
+        ).order_by(
+            'session__course__subject__name',
+            'session__course__number', 'number'
+        )
+
     def getSCIPSectionAssignments(self, file=''):
         scipSol = open(file, 'r')
         for line in scipSol:
@@ -840,23 +889,55 @@ class SectionManager(models.Manager):
                 section.instructor = instructor
                 section.save()
 
-    def assignmentsCSVByInstructor(self, outfile='', term='2177', type=''):
+    def getAssignmentsFromExcel(self, file=''):
+        if file=='':
+            print "'Usage: getAssignmentsFromExcel file='example.xlsx'"
+            return
+        sheet = pd.read_excel(file, header=0)
+        for i in range(31):
+            firstName = sheet['First Name'][i]
+            lastName = sheet['Last Name'][i]
+            emplid = unicode(int(sheet['SFSU ID'][i]))
+            instructorType = sheet['GTA/LEC'][i]
+            person = Person.objects.get(username=emplid)
+            #print person, firstName, lastName
+            for j in range(61):
+                sectionName = sheet.columns[j + 9]
+                section = Section.objects.get(
+                    session__course__subject__name=sectionName[0:4],
+                    session__course__number=sectionName[5:8],
+                    number=sectionName[9:11],
+                    session__term__number='2183'
+                )
+                #print sectionName, section, sheet.iloc[i, j+9]
+                if sheet.iloc[i, j+9] == 1:
+                    print sectionName, ' instructor = ', person
+                    section.instructor = person
+                    section.save()
+                #section = section[0]
 
 
+    def assignmentsCSVByInstructor(self, outfile='', term='2183', type=''):
+
+        # get lower division labs only
         sections = self.filter(
             session__term__number=term,
+            session__course__number__lt=300,
+            #session__course__subject__name='PHYS',
+            courseType__name='LAB'
         ).order_by('instructor__last_name', 'instructor__first_name',
                    'session__course__subject__name',
                    'session__course__number',
                    'number')
-        if type != '':
-            sections = sections.filter(
-                courseType__name=type
-            )
+        #if type != '':
+        #    sections = sections.filter(
+        #        courseType__name=type
+        #    )
         oString = ''
         for section in sections:
             startTime = section.startTime.__str__()[0:5]
             endTime = section.endTime.__str__()[0:5]
+            print section, section.meetDays
             meetDays = re.sub('Su', '', section.meetDays)
             meetDays = re.sub('\s', '', meetDays)
             if section.instructor:
@@ -1471,10 +1552,40 @@ class TermInstructor(models.Model):
 
 class SectionPreferenceManager(models.Manager):
 
+    def createFromConflicts(self, instructors=None, sections=None):
+        if instructors==None or sections==None:
+            return
+        for section in sections:
+            msg = section.__unicode__() + ':    '
+            for instructor in instructors:
+                person = instructor.person_ptr
+                sectionPreference, new = self.get_or_create(
+                    section=section, instructor=person,
+                )
+                if person.conflictsWith(section):
+                    sectionPreference.preference=0
+                else:
+                    sectionPreference.preference=1
+                    msg += instructor.last_name + ', '
+                sectionPreference.save()
+            print msg
+
+    def countInstructorsForSection(self, section):
+        return SectionPreference.objects.filter(
+            section=section, preference__gte=1,
+        ).count()
+
+    def getLDLabSectionsWithNoPossibleInstructors(self, termNumber=''):
+        for section in Section.objects.getLDLabSections(termNumber=termNumber):
+            print section
+            if self.countInstructorsForSection(section) == 0:
+                print section, ' has no possible instructors'
+
+
     def getPreferences(self, excelFile, only=''):
         gtaGroup = Group.objects.get(name='GTA')
         sheet = pd.read_excel(excelFile, header=0)
-        term = Term.objects.get(number='2177')
+        term = Term.objects.get(number='2183')
         ldLabSections = Section.objects.filter(
             session__term=term,
             session__course__number__lt=300,
@@ -1501,13 +1612,13 @@ class SectionPreferenceManager(models.Manager):
         #conflicts = numpy.zeros(shape = (nGTASections, nLDLabSections), dtype=numpy.int)
         print nGTASections, 'GTA courses'
         #return
-        for i in range(37):             # instructors
-            lastName = sheet['LAST_NAME'][i]
-            firstName = sheet['FIRST_NAME'][i]
-            emplid = unicode(int(sheet['EMPLID'][i]))
-            email = sheet['EMAIL_ADDR'][i]
+        for i in range(31):             # instructors
+            firstName = sheet['First Name'][i]
+            lastName = sheet['Last Name'][i]
+            emplid = unicode(int(sheet['SFSU ID'][i]))
+            email = sheet['Email'][i]
             instructorType = sheet['GTA/LEC'][i]
-            instructorPriority = int(sheet['PRIORITY'][i])
+            #instructorPriority = int(sheet['PRIORITY'][i])
             if only != '':
                 if only != instructorType:
                     continue
@@ -1518,7 +1629,8 @@ class SectionPreferenceManager(models.Manager):
                 username=emplid
             )
             #instructor.gta = gta
-            instructor.groups.add(gtaGroup)
+            if gta:
+                instructor.groups.add(gtaGroup)
             #instructor.priority = instructorPriority
             if new:
                 instructor.first_name = firstName
@@ -1534,8 +1646,8 @@ class SectionPreferenceManager(models.Manager):
             termInstructor.approvedLoad = approvedLoad
             termInstructor.save()
             #term.instructors.add(instructor)
-            for j in range(57):         # sections to assign
-                sectionName = sheet.columns[j+12]
+            for j in range(61):         # sections to assign
+                sectionName = sheet.columns[j+8]
                 #print sectionName
                 section = ldLabSections.filter(
                     session__course__subject__name=sectionName[0:4],
@@ -1544,7 +1656,7 @@ class SectionPreferenceManager(models.Manager):
                 )
                 section = section[0]
                 #print section
-                preference = int(sheet.iloc[i][j+12])
+                preference = int(sheet.iloc[i][j+8])
                 try:
                     sectionPreference = SectionPreference.objects.get(
                         section=section, instructor=instructor
@@ -1554,34 +1666,40 @@ class SectionPreferenceManager(models.Manager):
                     sectionPreference = SectionPreference.objects.create(
                         section=section, instructor=instructor, preference=preference
                     )
-                if preference != 0 and gtaGroup in instructor.groups.all():
-                    for k in range(14):     # GTA's own class plans
-                        attending = sheet.iloc[i][k+69]
-                        gtaCourseName = sheet.columns[k+69]
-                        #if k==14:
-                        #print gtaCourseName
-                        theseSections = gtaSections.filter(
-                            session__course__subject__name=gtaCourseName[0:4],
-                            session__course__number=gtaCourseName[5:8]
-                        )
-                        #print theseSections
-                        if attending == 'Yes' or attending == 'Maybe':
-                            for thisSection in theseSections:
-                                #print section, gtaSection, ' checking for conflict'
-                                if section.conflicts.filter(pk=thisSection.pk).exists():
-                                    print section, thisSection, 'conflict: setting section preference to 0'
-                                    sectionPreference.preference = 0
+                # if preference != 0 and gtaGroup in instructor.groups.all():
+                #     for k in range(14):     # GTA's own class plans
+                #         attending = sheet.iloc[i][k+69]
+                #         gtaCourseName = sheet.columns[k+69]
+                #         #if k==14:
+                #         #print gtaCourseName
+                #         theseSections = gtaSections.filter(
+                #             session__course__subject__name=gtaCourseName[0:4],
+                #             session__course__number=gtaCourseName[5:8]
+                #         )
+                #         #print theseSections
+                #         if attending == 'Yes' or attending == 'Maybe':
+                #             for thisSection in theseSections:
+                #                 #print section, gtaSection, ' checking for conflict'
+                #                 if section.conflicts.filter(pk=thisSection.pk).exists():
+                #                     print section, thisSection, 'conflict: setting section preference to 0'
+                #                     sectionPreference.preference = 0
                 sectionPreference.save()
 
-    def zimpl(self, file='/Users/marzke/Department/Fall2017/input.zpl', termNumber='2177'):
+    def zimpl(self, file='/Users/marzke/Department/Spring2018/input.zpl',
+              termNumber='2183'):
 
         out = open(file, 'w')
 
         # write instructors
-        sectionPreferences = SectionPreference.objects.all().order_by(
-            'instructor__last_name', 'instructor__first_name').distinct(
+        sectionPreferences = SectionPreference.objects.filter(
+            section__session__term__number='2183'
+        ).order_by(
+            'instructor__last_name', 'instructor__first_name',
+
+        ).distinct(
             'instructor__last_name', 'instructor__first_name'
         )
+
         #instructors = sectionPreferences.values_list('instructor__last_name')
         instructorString = 'set I :={'
         for sectionPreference in sectionPreferences:
@@ -1590,9 +1708,23 @@ class SectionPreferenceManager(models.Manager):
         out.write(instructorString)
 
         # write sections
-        sections = Section.objects.getLDLabSections(termNumber=termNumber)
+        #sections = Section.objects.getLDLabSections(termNumber=termNumber)
+        DsectionPreferences = SectionPreference.objects.filter(
+            section__session__term__number='2183'
+        ).distinct(
+            'section__session__course__subject__name',
+            'section__session__course__number',
+            'section__number'
+        ).order_by(
+            'section__session__course__subject__name',
+            'section__session__course__number',
+            'section__number'
+        )
+        sections = []
         sectionString = 'set S :={'
-        for section in sections:
+        for DsectionPreference in DsectionPreferences:
+            section = DsectionPreference.section
+            sections.append(section)
             sectionString += '"%s",' % section.__unicode__()
         sectionString = sectionString[:-1] + '}'
         out.write(sectionString + ";\n")
@@ -1603,8 +1735,10 @@ class SectionPreferenceManager(models.Manager):
         out.write(pString + "\n")
         pString = ''
         for sectionPreference in sectionPreferences:
+            print sectionPreference
             pString += ' | "%s" |' % re.sub('\s', '_', sectionPreference.instructor.last_name)
             for section in sections:
+                print section
                 otherSectionPreference = SectionPreference.objects.get(
                     section=section, instructor=sectionPreference.instructor
                 )
@@ -1665,12 +1799,12 @@ class SectionPreferenceManager(models.Manager):
             else:
                 iString = 'subto load%s: forall <i> in {"%s"} do sum <s> in S: x[i,s] <= L[i];\n' % (lastName, lastName)
             out.write(iString)
-            for i in range(sections.count()):
+            for i in range(len(sections)):
                 section1 = sections[i]
                 sectionPreference1 = SectionPreference.objects.get(
                     section=section1, instructor=instructor
                 )
-                for j in range(i+1, sections.count()):
+                for j in range(i+1, len(sections)):
                     section2 = sections[j]
                     sectionPreference2 = SectionPreference.objects.get(
                         section=section2, instructor=instructor
