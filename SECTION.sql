@@ -9,5 +9,5 @@ from CMSCOMMON.SFO_CLASS_TBL t
 join (select * from CMSCOMMON.SFO_CR_IOC_MV union select * from CMSCOMMON.SFO_CR_IOC_NO_MV) i
 on i.strm=t.strm and i.CLASS_NBR=t.CLASS_NBR
 and t.class_type = 'E'
-where to_number(t.strm)>=2173 and t.acad_org like '572%'
+where to_number(t.strm)>=2187 and t.acad_org like '572%'
 order by subject, catalog_nbr, class_section

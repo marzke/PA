@@ -76,9 +76,9 @@ DATABASES = {
     },
     'parent': {
         'ENGINE': 'django.db.backends.oracle',
-        'NAME': 'REPL',
+        'NAME': 'PROD',
         'USER': 'AASCIEPT',
-        'PASSWORD': 'AASCIEPT#16_10',
+        'PASSWORD': 'rfmmrw_480',
         'HOST': 'dbgrid-scan.sfsu.edu',
         'PORT': '1521',
     }

@@ -80,7 +80,7 @@ class Person(AbstractUser):
 #            super(Person, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return "{0}  {2} {1}".format(self.username, self.last_name,
+        return u'{0}  {2} {1}'.format(self.username, self.last_name,
                                       self.first_name)
 
 # roles are handled as permissions using auth 2017-01-16
@@ -398,9 +398,9 @@ class GTA(Student):
 
 class AcademicGroup(models.Model):
     name = models.CharField(max_length=30)
-    databaseColumnName = models.CharField(max_length=5)
+    #databaseColumnName = models.CharField(max_length=5)
     description = models.CharField(max_length=60, blank=True, null=True)
-    admins = models.ManyToManyField(Person, related_name='academic_groups_as_admin', blank=True)
+    #admins = models.ManyToManyField(Person, related_name='academic_groups_as_admin', blank=True)
 
     def __unicode__(self):
         return self.description
@@ -408,17 +408,17 @@ class AcademicGroup(models.Model):
 
 class AcademicOrganization(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
-    databaseColumnName = models.CharField(max_length=10, unique=True)
-    #description = models.CharField(max_length=60, blank=True, null=True)
-    admins = models.ManyToManyField(Person, related_name='academic_orgs_as_admin', blank=True)
+    #databaseColumnName = models.CharField(max_length=10, unique=True)
+    description = models.CharField(max_length=60, blank=True, null=True)
+    #admins = models.ManyToManyField(Person, related_name='academic_orgs_as_admin', blank=True)
 
     def __unicode__(self):
-        return self.databaseColumnName
+        return self.name
 
 
 class College(AcademicGroup):
     dean = models.ForeignKey(Person, related_name='colleges_is_dean', blank=True, null=True)
-    staff = models.ManyToManyField(Person, related_name='colleges_is_staff', blank=True)
+    #staff = models.ManyToManyField(Person, related_name='colleges_is_staff', blank=True)
 
 
 class School(AcademicOrganization):
@@ -431,8 +431,8 @@ class Department(AcademicOrganization):
     college = models.ForeignKey(College)
     chair = models.ForeignKey(Person, related_name='departments_is_chair', blank=True, null=True)
     aoc = models.ForeignKey(Person, related_name='departments_is_aoc', blank=True, null=True)
-    staff = models.ManyToManyField(Person, related_name='departments_is_staff', blank=True)
-    faculty = models.ManyToManyField(Person, related_name='departments_is_faculty', blank=True)
+    #staff = models.ManyToManyField(Person, related_name='departments_is_staff', blank=True)
+    #faculty = models.ManyToManyField(Person, related_name='departments_is_faculty', blank=True)
 
 
 class Program(AcademicOrganization):
@@ -494,13 +494,24 @@ class CourseType(models.Model):
         return self.name
 
 
+class KFactorManager(models.Manager):
+
+    def WTUperSCU(self, aCSNumber):
+        try:
+            kfactor = self.get(CSNumber=aCSNumber)
+            return kfactor.factor
+        except:
+            return None
+
+
 class KFactor(models.Model):
-    minCSNumber = models.SmallIntegerField(blank=True, null=True)
-    maxCSNumber = models.SmallIntegerField(blank=True, null=True)
+    CSNumber = models.SmallIntegerField(blank=True, null=True)
     factor = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
+    objects = KFactorManager()
 
     def __unicode__(self):
-        return '{0} - {1}'.format(self.minCSNumber, self.maxCSNumber)
+        return 'KFactor({0}) = {1}'.format(self.CSNumber, self.factor)
+
 
 class Course(models.Model):
     subject = models.ForeignKey(Subject)
@@ -614,6 +625,23 @@ class Term(models.Model):
         return self.get_season_display() + self.year
 
 
+class SessionCorrelation(models.Model):
+
+    fromSession = models.ForeignKey('Session',related_name='from_correlations')
+    toSession = models.ForeignKey('Session', related_name='to_correlations')
+    coefficient = models.FloatField()
+
+    def __unicode__(self):
+        return '{0}, {1}: {2}'.format(self.fromSession, self.toSession, self.coefficient)
+
+
+class SessionConflict(models.Model):
+
+    fromSession = models.ForeignKey('Session', related_name='from_conflicts')
+    toSession = models.ForeignKey('Session', related_name='to_conflicts')
+    seats = models.IntegerField()
+
+
 class SessionManager(models.Manager):
 
     def sync(self):
@@ -648,6 +676,12 @@ class Session(models.Model):
     course = models.ForeignKey(Course)
     term = models.ForeignKey(Term)
     coordinator = models.ForeignKey(Person, blank=True, null=True)
+    correlations = models.ManyToManyField('self', symmetrical=False,
+                                          through='SessionCorrelation',
+                                          related_name='correlated_with')
+    conflicts = models.ManyToManyField('self', symmetrical=False,
+                                       through='SessionConflict',
+                                       related_name='conflicts_with')
     objects = SessionManager()
 
     def __unicode__(self):
@@ -656,6 +690,24 @@ class Session(models.Model):
 
     class Meta:
         unique_together = (('course', 'term'),)
+
+    def conflictedSeats(self, other):
+        if not isinstance(other, Session):
+            raise
+        seats = 0
+        for section in self.section_set:
+            unassignedSeats = section.enrollCap
+            for otherSection in other.section_set:
+                if section.conflictsWith(otherSection):
+                    return
+                else:
+                    unassignedSeats -= otherSection.enrollCap
+
+    def sessionCap(self):
+        cap = 0
+        for section in self.section_set:
+            cap += section.enrollCap
+        return cap
 
 
 class ParentRouter(object):
@@ -779,7 +831,7 @@ class SectionManager(models.Manager):
                         #print 'instructor before save: ', instructor.first_name, instructor.last_name, instructor.username
                         instructor.save()
                 if instructorExists:
-                    print instructor
+                    print instructor.__unicode__().encode('ascii','replace')
                 else:
                     print 'No istructor listed'
                 print session,sectionParent.classSection.strip(),sectionParent.classNumber,courseType
@@ -831,6 +883,20 @@ class SectionManager(models.Manager):
                 section.enrollCap = sectionParent.enrollCap
                 section.waitCap = sectionParent.waitCap
                 section.save()
+
+    def getQuickConflicts(self, termNumber=''):
+        sectionDict = Section.objects.filter(session__term__number=termNumber).exclude(
+            courseType__name='SUP').prefetch_related('meetings','session__term'
+        ).in_bulk()
+        sections = sectionDict.values()
+        nSections = len(sections)
+        for i in range(nSections):
+            print sections[i]
+            for j in range(i+1,nSections):
+                if sections[i].conflictsWith(sections[j]):
+                    pass
+                    #print sections[i], ' conflicts with ', sections[j]
+                    #sections[i].conflicts.add(sections[j])
 
     def getConflicts(self, termNumber=''):
         sections = Section.objects.filter(session__term__number=termNumber).exclude(
@@ -1001,6 +1067,21 @@ class Section(models.Model):
     roomCap = models.IntegerField(blank=True, null=True)
     enrollCap = models.IntegerField(blank=True, null=True)
     waitCap = models.IntegerField(blank=True, null=True)
+
+    enrollingStatus = models.CharField(max_length=1, blank=True, null=True)
+    classStatus = models.CharField(max_length=1, blank=True, null=True)
+    classType = models.CharField(max_length=1, blank=True, null=True)
+    associatedClass = models.IntegerField(blank=True, null=True)
+    schedulePrint = models.CharField(max_length=1, blank=True, null=True)
+    acadOrg = models.CharField(max_length=10, blank=True, null=True)
+    acadCareer = models.CharField(max_length=4, blank=True, null=True)
+    acadGroup = models.CharField(max_length=5, blank=True, null=True)
+    institution = models.CharField(max_length=5, blank=True, null=True)
+    campus = models.CharField(max_length=5, blank=True, null=True)
+    campusEventNumber = models.CharField(max_length=9, blank=True, null=True)
+    combinedSection = models.CharField(max_length=1, blank=True, null=True)
+    sessionCode = models.CharField(max_length=3, blank=True, null=True)
+
     conflicts = models.ManyToManyField('self', blank=True)
     students = models.ManyToManyField(Student, blank=True,
                                       through='SectionStudent')
@@ -1008,7 +1089,7 @@ class Section(models.Model):
     objects = SectionManager()
 
     class Meta:
-        unique_together = ('session', 'number')
+        unique_together = ('session', 'number', 'classStatus')
 
     def __unicode__(self):
         return "{0}{1}{2}.{3}".format(
@@ -1063,12 +1144,12 @@ class Section(models.Model):
                 return False
             if self.session.term != other.session.term:
                 return False
-            if self.meetings.all().count() == 0 or other.meetings.all().count() == 0:
+            if self.meetings.count() == 0 or other.meetings.count() == 0:
                 return False
-            for meeting1 in self.meetings.all():
-                for meeting2 in other.meetings.all():
-                    if meeting1.conflictsWith(meeting2):
-                        return True
+            #for meeting1 in self.meetings.all():
+            #    for meeting2 in other.meetings.all():
+            #        if meeting1.conflictsWith(meeting2):
+            #            return True
             return False
         else:
             raise
@@ -1101,7 +1182,7 @@ class SectionStudentParent(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'ENROLL'
+        db_table = 'ENROLL_VW'
 
     def __unicode__(self):
         return "{0} {1}{2}.{3}   {4} {5},{6}".format(
@@ -1204,6 +1285,132 @@ class SectionStudent(models.Model):
 
     def __unicode__(self):
         return "{0}   {1}".format(self.student.__unicode__(), self.section.__unicode__())
+
+
+class Reason(models.Model):
+    name=models.CharField(max_length=64, unique=True)
+    description=models.CharField(max_length=512, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class WithdrawalReason(models.Model):
+    reason = models.ForeignKey(Reason, on_delete=models.CASCADE)
+    withdrawalPreferences = models.ForeignKey('WithdrawalPreferences', on_delete=models.CASCADE)
+    rank = models.SmallIntegerField()
+
+    def __unicode__(self):
+        return "Withdrawal Reason {0} ({1}) for {2} ".format(self.rank,
+                                                 self.reason.__unicode__(),
+                                                 self.withdrawalPreferences.__unicode__()
+                                                 )
+
+class ApproverList(models.Model):
+    level = models.SmallIntegerField()
+    groups = models.ManyToManyField(Group)
+
+    def __unicode__(self):
+        return "Level {0} approval roles: {1}".format(self.level, self.groups.all())
+
+
+class WithdrawalPreferences(models.Model):
+    college = models.OneToOneField(College)
+    approverLists = models.ManyToManyField(ApproverList, related_name='withdrawal_approver_for')
+    denierLists = models.ManyToManyField(ApproverList, related_name='withdrawal_denier_for')
+    reasons = models.ManyToManyField(Reason, through='WithdrawalReason')
+
+    def __unicode__(self):
+        return "Withdrawal preferences for {0}".format(self.college.__unicode__())
+
+
+class Withdrawal(models.Model):
+    sectionStudent = models.OneToOneField(SectionStudent)
+    approvedBy = models.ManyToManyField(Person, blank=True,
+                                        related_name='approved_withdrawals')
+    deniedBy = models.ManyToManyField(Person, blank=True,
+                                      related_name='denied_withdrawals')
+    approvalLevel = models.SmallIntegerField(default=0)
+    status = models.NullBooleanField(default=None, choices=((True,'APPROVED'),
+                                                            (None,'WAITING'),
+                                                            (False,'DENIED'),
+                                                            ))
+    def __unicode__(self):
+        return "Withdrawal for {0}".format(self.sectionStudent.__unicode__())
+
+    def college(self):
+        acadOrg = self.sectionStudent.section.session.course.subject.host
+        try:
+            return acadOrg.department.college
+        except:
+            print "{0} is not a department".format(acadOrg.__unicode__())
+        try:
+            return acadOrg.school.college
+        except:
+            print "{0} is not a school".format(acadOrg.__unicode__())
+        return None
+
+    def approve(self, person):
+        self.approvedBy.add(person)
+        return self.update()
+
+    def deny(self, person):
+        self.deniedBy.add(person)
+        return self.update()
+
+    def update(self):
+        """
+        returns current approval level:
+        L=0     no approvals or denials yet (status set to WAITING)
+        L<0     denied at level |L| (status set to DENIED if |L|=Lmax, WAITING otherwise)
+        L>0     approved at level L (status set to APPROVED if L=Lmax, WAITING otherwise)
+        """
+        try:
+            preferences = WithdrawalPreferences.objects.get(college=self.college())
+        except:
+            print 'Problem retrieving withdrawal preferences'
+            return None
+        approvedByRoles = set()
+        for person in self.approvedBy.all():
+            for role in person.groups.all():
+                approvedByRoles.add(role)
+        approverLists = preferences.approverLists.order_by('-level')
+        if approverLists is None:
+            print 'Problem with approverLists'
+            return None
+        maxApprovalLevel = approverLists[0].level
+        for approverList in approverLists:
+                if approverList.level > abs(self.approvalLevel):
+                    if len(approvedByRoles.intersection(set(approverList.groups.all())))!=0:
+                        self.approvalLevel = approverList.level
+        if self.approvalLevel == maxApprovalLevel:
+                    self.status = True
+        deniedByRoles = set()
+        for person in self.deniedBy.all():
+            for role in person.groups.all():
+                deniedByRoles.add(role)
+        denierLists = preferences.denierLists.order_by('level')
+        if denierLists is None:
+            print 'Problem with denierLists'
+            return None
+        minDenialLevel = -denierLists[0].level
+        for denierList in denierLists:
+            if denierList.level > abs(self.approvalLevel):
+                if len(deniedByRoles.intersection(set(denierList.groups.all()))) != 0:
+                    self.approvalLevel = -approverList.level
+        if self.approvalLevel == minDenialLevel:
+            self.status = False
+        self.save()
+        return self.status
+
+
+
+
+
+
+
+
+
 
 # class SectionStudentNote(models.Model):
 #     sectionStudent = models.ForeignKey(SectionStudent)
@@ -1888,3 +2095,5 @@ class Appointment(models.Model):
 
     def timeBaseForWTU(self, wtu):
         return round(wtu / self.fullTimeWTU)
+
+

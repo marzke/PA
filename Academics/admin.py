@@ -19,7 +19,7 @@ class ProgramAdmin(ModelAdmin):
     ordering = ('name',)
 
 class KFactorAdmin(ModelAdmin):
-    ordering = ('minCSNumber',)
+    ordering = ('CSNumber',)
 
 class TermAdmin(ModelAdmin):
     fields = ['season', 'year']
@@ -57,6 +57,9 @@ class SectionStudentAdmin(ModelAdmin):
                 'student__first_name',
     )
 
+class WithdrawalAdmin(ModelAdmin):
+    fields = ('sectionStudent', 'approvalLevel','status',)
+
 # class ExamScoreAdmin(ModelAdmin):
 #     ordering = ('student__last_ame','student__first_name',
 #                 'date', 'score'
@@ -90,9 +93,16 @@ admin.site.register(CourseType)
 # admin.site.register(Exam)
 # admin.site.register(ExamScore, ExamScoreAdmin)
 admin.site.register(Prerequisite)
+admin.site.register(SessionCorrelation)
+admin.site.register(SessionConflict)
 admin.site.register(StudentGrade)
 admin.site.register(SectionPreference)
 admin.site.register(TermInstructor)
 #admin.site.register(DegreeCourse)
 #admin.site.register(DegreeCourseGroup)
 admin.site.register(Degree)
+admin.site.register(ApproverList)
+admin.site.register(WithdrawalPreferences)
+admin.site.register(Withdrawal)
+admin.site.register(Reason)
+admin.site.register(WithdrawalReason)
