@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tenure Track Student/Faculty Ratio</title>
+    {{ form.media }}
+</head>
+<body>
+<div class='menu-container'>
+    <div class='form-type'><h1>Tenure Track SFR</h1></div>
+</div>
+<form action="/PA/collegeTTSFR/", method="post">
+    {% csrf_token %}
+    {{  form }}
+    <input type="submit" value="Submit" />
+</form>
+<div class="grid">
+{% for department in departments %}
+    <div class="item">
+        <div class="item-content">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ department.name }}</h5>
+                    <h6 class="card-text">TTSFR = {{TTSFRs.department }}</h6>
+                    {% comment %}<a href="#" class="btn btn-primary">Go somewhere</a>{% endcomment %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>
+</body>
+</html>

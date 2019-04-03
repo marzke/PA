@@ -1,8 +1,10 @@
 from django.shortcuts import render
+from django.db.models import Q
 from django.views import generic
-from django.forms import modelformset_factory, TextInput
+from django.forms import modelformset_factory, formset_factory, TextInput
+from django.http import HttpResponseRedirect
 from .models import *
-from .forms import LandingForm, SectionPreferenceForm
+from .forms import LandingForm, SectionPreferenceForm, ReasonPreferenceForm, CollegeTTSFRForm
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 
@@ -109,3 +111,80 @@ def SectionPreferencesView(request, termNumber):
             form.fields['preference'].widget.attrs['disabled']=True
     context = {'formset': formset, 'zip':zip(formset.queryset, formset, comments), 'request':request}
     return render(request, 'academics/sectionPreferences.html', context)
+
+
+@login_required
+def WithdrawalPreferencesView(request, collegeName):
+    try:
+        withdrawalReasons = WithdrawalReason.objects.filter(withdrawalPreferences__college__name=collegeName)
+    except:
+        print 'Failed to get withdrawal reasons object'
+    queryset = withdrawalReasons.order_by('rank')
+    ReasonFormSet = modelformset_factory(Reason, form=ReasonPreferenceForm, extra=0)
+    formset = ReasonFormSet(queryset=queryset)
+    context = {'formset': formset, 'zip':zip(formset.queryset, formset),'request':request}
+    return render(request, 'academics/reasonPreferences.html', context)
+
+@login_required
+def CollegeTTSFRView(request):
+    departments = None
+    TTSFRs = None
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = CollegeTTSFRForm(request.POST)
+        print request.POST['college']
+        departments = Department.objects.filter(college__name=request.POST['college']).order_by(
+            'name'
+        )
+        TTSFRs = {}
+        for department in departments:
+            TTSFRs[department]=department.TTSFR(request.POST['term'])
+        info = zip(departments, TTSFRs)
+        # check whether it's valid:
+        if form.is_valid():
+            print 'Form is valid'
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            #return HttpResponseRedirect('/PA/TTSFR/{0}/{1}'.format(college, ))
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = CollegeTTSFRForm()
+
+    return render(request, 'academics/collegeTTSFR.html', {'form': form,
+                                                           'departments': departments,
+                                                           'TTSFRs':TTSFRs,
+                                                           }
+                  )
+
+
+
+
+
+
+
+    # CollegeTTSFRFormSet = formset_factory(CollegeTTSFRForm)
+    # formset = CollegeTTSFRFormSet(queryset=departments)
+    #
+    # departments = college.department_set.all()
+    # schools = college.school_set.all()
+    # programs = college.program_set.all()
+    # qhost = Q(session__course__subject__host__in=departments) | \
+    #         Q(session__course__subject__host__in=schools) | \
+    #         Q(session__course__subject__host__in=programs)
+    # sections = Section.objects.filter(
+    #     qhost,
+    #     session__term__number=termNumber,
+    # ).order_by('session__course__subject',
+    #            'session__course__number',
+    #            'number')
+    #
+    # context = {'college':college,
+    #            'departments':departments,
+    #            'schools':schools,
+    #            'programs':programs,
+    #            'sections':sections,
+    # }
+    # return render(request, 'academics/collegeTTSFR.html', context)

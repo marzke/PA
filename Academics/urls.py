@@ -13,5 +13,8 @@ urlpatterns = [
 #    url(r'SectionPreference/(?P<pk>[0-9]+)/$', views.SectionPreferenceView.as_view(), name='sectionpreference-update'),
     url(r'SectionPreference/(?P<pk>[0-9]+)/$', views.SectionPreferenceFunctionView, name='sectionpreference-update'),
     url(r'SectionPreferences/(?P<termNumber>[0-9]+)/$', views.SectionPreferencesView, name='sectionpreferences-update'),
+    url(r'WithdrawalPreferences/(?P<collegeName>\w+)/$', views.WithdrawalPreferencesView, name='withdrawalpreferences-update'),
+    url(r'TTSFR/(?P<termNumber>[0-9]+)/(?P<collegeName>\w+)/$', views.CollegeTTSFRView, name='TTSFR'),
+    url(r'collegeTTSFR/$', views.CollegeTTSFRView, name='collegeTTSFR'),
     url(r'admin/', admin.site.urls),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -398,7 +398,6 @@ class GTA(Student):
 
 class AcademicGroup(models.Model):
     name = models.CharField(max_length=30)
-    #databaseColumnName = models.CharField(max_length=5)
     description = models.CharField(max_length=60, blank=True, null=True)
     #admins = models.ManyToManyField(Person, related_name='academic_groups_as_admin', blank=True)
 
@@ -408,12 +407,25 @@ class AcademicGroup(models.Model):
 
 class AcademicOrganization(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
-    #databaseColumnName = models.CharField(max_length=10, unique=True)
     description = models.CharField(max_length=60, blank=True, null=True)
     #admins = models.ManyToManyField(Person, related_name='academic_orgs_as_admin', blank=True)
 
     def __unicode__(self):
-        return self.name
+        return self.description
+
+    def TTSFR(self, termNumber):
+        #people = Person.objects.filter(acad_org=self, term__number=termNumber)
+        sections = Section.objects.filter(session__course__subject__host=self,
+                                          session__term__number=termNumber)
+        ftes = 0.
+        for section in sections:
+            ftes += section.FTES()
+        return ftes
+
+        # ftef = 0.
+        # for person in people:
+        #     if person.jobcode = 'TEN':
+        #         ftef += person.fte
 
 
 class College(AcademicGroup):
@@ -438,6 +450,7 @@ class Department(AcademicOrganization):
 class Program(AcademicOrganization):
     college = models.ForeignKey(College)
     director = models.ForeignKey(Person, related_name='programs_is_director', blank=True, null=True)
+    aoc = models.ForeignKey(Person, related_name='programs_is_aoc', blank=True, null=True)
 
 
 class Subject(models.Model):
@@ -513,11 +526,74 @@ class KFactor(models.Model):
         return 'KFactor({0}) = {1}'.format(self.CSNumber, self.factor)
 
 
+class CourseParent(models.Model):
+
+    minstrm = models.CharField(max_length=4, db_column='MINSTRM')
+    maxstrm = models.CharField(max_length=4, db_column='MAXSTRM')
+    subject = models.CharField(max_length=8, db_column='SUBJECT')
+    catalog_nbr = models.CharField(max_length=10, db_column='CATALOG_NBR')
+    acad_group = models.CharField(max_length=5, db_column='ACAD_GROUP')
+    acad_org = models.CharField(max_length=10, db_column='ACAD_ORG')
+    crse_id = models.CharField(max_length=6, db_column='CRSE_ID', primary_key=True)
+    course_title_long = models.CharField(max_length=100, db_column='COURSE_TITLE_LONG')
+    units_acad_prog = models.SmallIntegerField(db_column='UNITS_ACAD_PROG')
+    crse_contact_hrs = models.SmallIntegerField(db_column='CRSE_CONTACT_HRS')
+    descrlong = models.CharField(max_length=4000, db_column='DESCRLONG')
+    effdt = models.DateField(db_column='EFFDT')
+
+
+    class Meta:
+        managed = False
+        db_table = 'COURSE_VW'
+
+    def __unicode__(self):
+        return '{0}  {1}  {2}'.format(
+            self.subject, self.catalog_nbr, self.course_title_long,
+        )
+
+
+class CourseManager(models.Manager):
+
+    def sync(self):
+
+        courseParents = CourseParent.objects.all()
+
+        for courseParent in courseParents:
+            try:
+                course = self.get(
+                    subject__name=courseParent.subject.strip(),
+                    number=courseParent.catalog_nbr.strip(),
+                )
+            except:
+                subject, new = Subject.objects.get_or_create(
+                    name=courseParent.subject.strip()
+                )
+                if new:
+                    host, new = AcademicOrganization.objects.get_or_create(
+                        description=courseParent.acad_org.strip()
+                    )
+                    subject.host = host
+                    subject.save()
+                #print subject, host
+                course, new = Course.objects.get_or_create(
+                    subject=subject,
+                    number=courseParent.catalog_nbr.strip(),
+                    #title=sectionParent.course_title_long.strip()
+                )
+            course.title = courseParent.course_title_long.strip()
+            course.description = courseParent.descrlong.strip()
+            course.units = courseParent.units_acad_prog
+            print course
+            course.save()
+
+
 class Course(models.Model):
     subject = models.ForeignKey(Subject)
     number = models.CharField(max_length=8)
     title = models.CharField(max_length=128, blank=True, null=True)
+    description = models.CharField(max_length=4000, blank=True)
     units = models.SmallIntegerField(blank=True, null=True)
+    contactHours = models.SmallIntegerField(blank=True, null=True)
     semestersOffered = models.CharField(max_length=16,
         blank=True, choices=(
         ('', 'Unknown'),
@@ -1098,16 +1174,16 @@ class Section(models.Model):
         )
 
     def getEnrolledStudents(self):
-        return self.students.sectionStudent.filter(status='ENROLLED')
+        return self.sectionstudent_set.filter(status='ENROLLED')
 
     def getWaitlistedStudents(self):
-        return self.students.sectionStudent.filter(status='WAITLISTED')
+        return self.sectionstudent_set.filter(status='WAITLISTED')
 
     def getUnregisteredStudents(self):
-        return self.students.sectionStudent.filter(status='UNREGISTERED')
+        return self.sectionstudent_set.filter(status='UNREGISTERED')
 
     def getDroppedStudents(self):
-        return self.students.sectionStudent.filter(status='DROPPED')
+        return self.sectionstudent_set.filter(status='DROPPED')
 
     def countEnrolledStudents(self):
         return self.getEnrolledStudents().count()
@@ -1136,6 +1212,11 @@ class Section(models.Model):
     def actualCost(self):
         return self.instructor.semesterSalaryForWTU(self.actualWTU)
 
+    def FTES(self):
+        if self.acadCareer == 'UGRD':
+            return self.session.course.units * self.countEnrolledStudents()/15.
+        else:
+            return self.session.course.units * self.countEnrolledStudents()/12.
 
 
     def conflictsWith(self, other):
