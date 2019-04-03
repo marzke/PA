@@ -1,20 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="45893c50-e691-4cfa-adae-1ce0475e9a95" name="Default" comment="Withdrawal models">
-      <change afterPath="$PROJECT_DIR$/Academics/migrations/0013_courseparent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/migrations/0014_course_description.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/migrations/0015_course_contacthours.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/static/Academics/css/collegeTTSFR.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html" afterDir="false" />
+    <list default="true" id="45893c50-e691-4cfa-adae-1ce0475e9a95" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/static/Academics/css/bootstrap.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/views.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -56,7 +44,7 @@
         <entry file="file://$PROJECT_DIR$/Academics/models.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="298">
-              <caret line="454" lean-forward="true" selection-start-line="454" selection-end-line="454" />
+              <caret line="454" selection-start-line="454" selection-end-line="454" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -559,7 +547,14 @@
       <option name="project" value="LOCAL" />
       <updated>1551033721106</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Withdrawal models">
+      <created>1554335385905</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1554335385905</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TodoView">
@@ -572,22 +567,22 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="440" y="27" width="992" height="829" extended-state="0" />
+    <frame x="389" y="27" width="992" height="829" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="7" weight="0.32857144" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.51391464" side_tool="true" weight="0.32786885" />
-      <window_info anchor="bottom" id="manage.py@PA" order="0" sideWeight="0.48608536" weight="0.32786885" />
+      <window_info active="true" anchor="bottom" id="Event Log" order="8" sideWeight="0.51473683" side_tool="true" visible="true" weight="0.32786885" />
+      <window_info anchor="bottom" id="manage.py@PA" order="0" sideWeight="0.48526317" visible="true" weight="0.32786885" />
       <window_info anchor="bottom" id="Database Changes" order="14" weight="0.329235" />
       <window_info anchor="bottom" id="Run" order="3" sideWeight="0.48886827" weight="0.27459016" />
       <window_info anchor="bottom" id="Version Control" order="11" weight="0.32857144" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="13" sideWeight="0.48603353" visible="true" weight="0.20081967" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.48603353" weight="0.20081967" />
       <window_info anchor="bottom" id="Terminal" order="15" weight="0.32857144" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46153846" visible="true" weight="0.21789473" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46138212" visible="true" weight="0.21789473" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="3" sideWeight="0.47350428" weight="0.32931355" />
       <window_info anchor="right" id="SciView" order="4" sideWeight="0.48034188" weight="0.32931355" />
-      <window_info id="Structure" order="1" sideWeight="0.53846157" side_tool="true" visible="true" weight="0.21789473" />
+      <window_info id="Structure" order="1" sideWeight="0.5386179" side_tool="true" visible="true" weight="0.21789473" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -940,7 +935,7 @@
     <entry file="file://$PROJECT_DIR$/Academics/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="298">
-          <caret line="454" lean-forward="true" selection-start-line="454" selection-end-line="454" />
+          <caret line="454" selection-start-line="454" selection-end-line="454" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>
