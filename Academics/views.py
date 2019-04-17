@@ -134,12 +134,14 @@ def CollegeTTSFRView(request):
         # create a form instance and populate it with data from the request:
         form = CollegeTTSFRForm(request.POST)
         print request.POST['college']
+        print request.POST['term']
         departments = Department.objects.filter(college__name=request.POST['college']).order_by(
             'name'
         )
         TTSFRs = {}
         for department in departments:
             TTSFRs[department]=department.TTSFR(request.POST['term'])
+            print TTSFRs[department]
         info = zip(departments, TTSFRs)
         # check whether it's valid:
         if form.is_valid():

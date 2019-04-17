@@ -2,7 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="45893c50-e691-4cfa-adae-1ce0475e9a95" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/Academics/migrations/0017_auto_20190404_1818.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Academics/migrations/0019_auto_20190417_1837.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Academics/migrations/0020_auto_20190417_1841.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Academics/migrations/0021_auto_20190417_1859.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Academics/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Academics/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Academics/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/views.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -43,8 +51,8 @@
       <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Academics/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="298">
-              <caret line="454" selection-start-line="454" selection-end-line="454" />
+            <state relative-caret-position="404">
+              <caret line="2295" column="22" selection-start-line="2295" selection-start-column="22" selection-end-line="2295" selection-end-column="22" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -52,20 +60,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="COURSE.sql" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/COURSE.sql">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="97">
-              <caret line="130" column="17" selection-start-line="130" selection-start-column="17" selection-end-line="130" selection-end-column="17" />
+            <state relative-caret-position="253">
+              <caret line="136" column="32" selection-start-line="136" selection-start-column="32" selection-end-line="136" selection-end-column="32" />
               <folding>
                 <element signature="e#0#35#0" expanded="true" />
               </folding>
@@ -76,8 +75,8 @@
       <file leaf-file-name="forms.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/forms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="179">
-              <caret line="38" column="23" lean-forward="true" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
+            <state relative-caret-position="211">
+              <caret line="38" column="23" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
               <folding>
                 <element signature="e#0#24#0" expanded="true" />
               </folding>
@@ -89,7 +88,16 @@
         <entry file="file://$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="60">
-              <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+              <caret line="4" selection-start-line="4" selection-end-line="4" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="admin.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Academics/admin.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="186">
+              <caret line="68" column="1" lean-forward="true" selection-start-line="68" selection-start-column="1" selection-end-line="68" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -98,7 +106,7 @@
         <entry file="file://$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="345">
-              <caret line="23" column="69" selection-start-line="23" selection-start-column="69" selection-end-line="23" selection-end-column="69" />
+              <caret line="23" column="53" selection-start-line="23" selection-start-column="53" selection-end-line="23" selection-end-column="53" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
@@ -110,7 +118,7 @@
         <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/collegeTTSFR.css">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="247">
-              <caret line="88" column="17" lean-forward="true" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
+              <caret line="88" column="17" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -183,13 +191,13 @@
         <option value="$PROJECT_DIR$/Academics/templates/academics/reasonPreference.html" />
         <option value="$PROJECT_DIR$/Academics/static/Academics/css/reasonPreferences.css" />
         <option value="$PROJECT_DIR$/Academics/templates/academics/reasonPreferences.html" />
-        <option value="$PROJECT_DIR$/Academics/admin.py" />
         <option value="$PROJECT_DIR$/Academics/urls.py" />
         <option value="$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js" />
         <option value="$PROJECT_DIR$/Academics/forms.py" />
         <option value="$PROJECT_DIR$/Academics/static/Academics/css/collegeTTSFR.css" />
         <option value="$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html" />
         <option value="$PROJECT_DIR$/Academics/views.py" />
+        <option value="$PROJECT_DIR$/Academics/admin.py" />
         <option value="$PROJECT_DIR$/Academics/models.py" />
       </list>
     </option>
@@ -204,10 +212,10 @@
     <packageJsonPaths />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="389" />
-    <option name="y" value="27" />
+    <option name="x" value="52" />
+    <option name="y" value="35" />
     <option name="width" value="992" />
-    <option name="height" value="829" />
+    <option name="height" value="822" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -554,7 +562,14 @@
       <option name="project" value="LOCAL" />
       <updated>1554335385905</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Add course parent model">
+      <created>1554335845451</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1554335845451</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TodoView">
@@ -567,22 +582,22 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="389" y="27" width="992" height="829" extended-state="0" />
+    <frame x="52" y="35" width="992" height="822" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="7" weight="0.32857144" />
-      <window_info active="true" anchor="bottom" id="Event Log" order="8" sideWeight="0.51473683" side_tool="true" visible="true" weight="0.32786885" />
-      <window_info anchor="bottom" id="manage.py@PA" order="0" sideWeight="0.48526317" visible="true" weight="0.32786885" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.51473683" side_tool="true" weight="0.20081967" />
+      <window_info anchor="bottom" id="manage.py@PA" order="0" sideWeight="0.48526317" weight="0.32689655" />
       <window_info anchor="bottom" id="Database Changes" order="14" weight="0.329235" />
-      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.48886827" weight="0.27459016" />
-      <window_info anchor="bottom" id="Version Control" order="11" weight="0.32857144" />
-      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.48603353" weight="0.20081967" />
+      <window_info active="true" anchor="bottom" id="Run" order="3" sideWeight="0.48886827" visible="true" weight="0.27448276" />
+      <window_info anchor="bottom" id="Version Control" order="11" weight="0.32827586" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.48526317" weight="0.20275863" />
       <window_info anchor="bottom" id="Terminal" order="15" weight="0.32857144" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46138212" visible="true" weight="0.21789473" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46197718" visible="true" weight="0.21789473" />
       <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="3" sideWeight="0.47350428" weight="0.32931355" />
       <window_info anchor="right" id="SciView" order="4" sideWeight="0.48034188" weight="0.32931355" />
-      <window_info id="Structure" order="1" sideWeight="0.5386179" side_tool="true" visible="true" weight="0.21789473" />
+      <window_info id="Structure" order="1" sideWeight="0.5380228" side_tool="true" visible="true" weight="0.21789473" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -650,7 +665,8 @@
     <MESSAGE value="SectionStudentManager, SectionStudentParent, ENROLL/SECTION SQL" />
     <MESSAGE value="snapshot before Fall 2018 updates" />
     <MESSAGE value="Withdrawal models" />
-    <option name="LAST_COMMIT_MESSAGE" value="Withdrawal models" />
+    <MESSAGE value="Add course parent model" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add course parent model" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/bootstrap.css">
@@ -789,20 +805,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/SECTION.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="56" selection-start-line="11" selection-end-line="11" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SECTION_VW.sql">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="44" lean-forward="true" selection-end-line="11" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ENROLL_VW.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -843,13 +845,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="28" lean-forward="true" selection-start-line="28" selection-end-line="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/sectionPreference.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="454">
@@ -871,52 +866,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/collegeTTSFR.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="247">
-          <caret line="88" column="17" lean-forward="true" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
+          <caret line="88" column="17" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EMPLOYEE.sql">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/forms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="179">
-          <caret line="38" column="23" lean-forward="true" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#24#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="69" selection-start-line="23" selection-start-column="69" selection-end-line="23" selection-end-column="69" />
-          <folding>
-            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="130" column="17" selection-start-line="130" selection-start-column="17" selection-end-line="130" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/COURSE.sql">
       <provider selected="true" editor-type-id="text-editor">
@@ -932,10 +890,68 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" column="53" selection-start-line="23" selection-start-column="53" selection-end-line="23" selection-end-column="53" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SECTION_VW.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" column="30" lean-forward="true" selection-start-line="6" selection-start-column="30" selection-end-line="6" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SECTION.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="56" selection-start-line="11" selection-end-line="11" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" selection-start-line="4" selection-end-line="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="253">
+          <caret line="136" column="32" selection-start-line="136" selection-start-column="32" selection-end-line="136" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="211">
+          <caret line="38" column="23" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#24#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/admin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="68" column="1" lean-forward="true" selection-start-line="68" selection-start-column="1" selection-end-line="68" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Academics/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="298">
-          <caret line="454" selection-start-line="454" selection-end-line="454" />
+        <state relative-caret-position="404">
+          <caret line="2295" column="22" selection-start-line="2295" selection-start-column="22" selection-end-line="2295" selection-end-column="22" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>

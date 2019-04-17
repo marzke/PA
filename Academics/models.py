@@ -468,29 +468,6 @@ class Subject(models.Model):
         return (self.name,)
 
 
-class CourseManager(models.Manager):
-
-    def sync(self):
-
-        parents = SectionParent.objects.all()
-
-        for parent in parents:
-            try:
-                course = Course.get(
-                    subject__name=parent.subject,
-                    number = parent.catalogNumber
-                )
-                subject = Subject.objects.get(name=row[0].strip())
-            except:
-                subject, new = Subject.objects.get_or_create(name=parent.subject)
-                course = Course.objects.create(
-                    subject=subject,
-                    number=parent.subject
-                )
-            #courseType, new = CourseType.objects.get_or_create(parent.courseType)
-            #course.courseType = courseType
-
-
 class CourseType(models.Model):
     name = models.CharField(max_length=8, choices=(
         ('LEC', 'Lecture'),
@@ -837,7 +814,7 @@ class SectionParent(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'SECTION'
+        db_table = 'SECTION_VW'
 
     def __unicode__(self):
         return "{0} {1}{2}.{3}".format(self.strm, self.subject,
@@ -2177,4 +2154,144 @@ class Appointment(models.Model):
     def timeBaseForWTU(self, wtu):
         return round(wtu / self.fullTimeWTU)
 
+
+class LeaveManager(models.Manager):
+
+    def importFromExcel(self, file):
+        typeDict = {'Leave':'LWOP', 'Leave W/Py':'LWDIP', 'Sabbatical':'Sabbatical'}
+        df = pd.read_excel(file, header=1, na_values=['NA'])
+        for i in range(len(df['ID'])):
+            person, new = Person.objects.get_or_create(username=df['ID'].iloc[i])
+            if new:
+                person.last_name = df['Last'].iloc[i]
+                person.first_name = df['First Name'].iloc[i]
+            effectiveDate = df['Eff Date'].iloc[i]
+            returnDate = df['Return Dt'].iloc[i]
+            type = typeDict[df['Pay Status'].iloc[i]]
+            FTE = df['FTE'].iloc[i]
+            leave, new = self.get_or_create(
+                person=person, effectiveDate=effectiveDate, returnDate=returnDate,
+                type=type, FTE=FTE,
+            )
+            leave.save()
+
+
+class Leave(models.Model):
+    person = models.ForeignKey(Person)
+    effectiveDate = models.DateField(blank=True, null=True)
+    returnDate = models.DateField(blank=True, null=True)
+    type = models.CharField(max_length=60,
+                            choices=(
+        ('Sabbatical', 'Sabbatical'),
+        ('LWDIP', 'Leave With Difference in Pay'),
+        ('LWOP', 'Leave Without Pay'),
+    ))
+    FTE = models.FloatField(blank=True, null=True)
+    objects = LeaveManager()
+
+    def __unicode__(self):
+        return '{0}: {1} {2}'.format(self.person.username,
+                                     self.person.first_name,
+                                     self.person.last_name)
+
+
+class FERPManager(models.Manager):
+
+    def importFromExcel(self, file):
+        df = pd.read_excel(file, header=1, na_values=['NA'])
+        for i in range(len(df['UIN'])):
+            person, new = Person.objects.get_or_create(username=df['UIN'].iloc[i])
+            if new:
+                person.last_name = df['Last'].iloc[i]
+                person.first_name = df['First Name'].iloc[i]
+            startDate = df['Appt End Date'].iloc[i]
+            endDate = df['FERP Elig End'].iloc[i]
+            FTE = df['FTE'].iloc[i]
+            FERP, new = self.get_or_create(
+                person=person, startDate=startDate, endDate=endDate,
+                FTE=FTE,
+            )
+            FERP.save()
+
+
+class FERP(models.Model):
+    person = models.ForeignKey(Person)
+    startDate = models.DateField(blank=True, null=True)
+    endDate = models.DateField(blank=True, null=True)
+    FTE = models.FloatField(blank=True, null=True)
+    objects = FERPManager()
+
+    def __unicode__(self):
+        return '{0}: {1} {2}'.format(self.person.username,
+                                     self.person.first_name,
+                                     self.person.last_name)
+
+
+class CommitteeManager(models.Manager):
+
+    def importFromExcel(self):
+        df = pd.read_excel(file, header=0, na_values=['NA'])
+        for i in range(len(df['ACAD_GROUP'])):
+            acadGroup = df['ACAD_GROUP'].iloc[i]
+            acadOrg = df['ACAD_ORG'].iloc[i]
+            name = df['NAME'].iloc[i]
+            nickname = df['NICKNAME'].iloc[i]
+            description = df['DESCRIPTION'].iloc[i]
+            committee, new = self.get_or_create(
+                acadGroup=acadGroup, acadOrg=acadOrg, name=name)
+            committee.nickname = nickname
+            committee.description = description
+            committee.save()
+
+
+class Committee(models.Model):
+    members = models.ManyToManyField(Person, blank=True, through='CommitteePerson')
+    acadOrg = models.ForeignKey(AcademicOrganization, blank=True, null=True)
+    acadGroup = models.ForeignKey(AcademicGroup, blank=True, null=True)
+    name = models.CharField(max_length=64)
+    nickname = models.CharField(max_length=8, blank=True)
+    description = models.CharField(max_length=512, blank=True)
+    size = models.SmallIntegerField()
+    termYears = models.SmallIntegerField(blank=True, null=True)
+    objects = CommitteeManager()
+
+    def __unicode__(self):
+        if self.acadOrg:
+            return "{0}, {1}: {2}".format(self.acadOrg, self.acadGroup, self.name)
+        else:
+            return "{0}: {1}".format(self.acadGroup, self.name)
+
+    class Meta:
+        unique_together = ('acadOrg', 'acadGroup', 'name')
+
+
+class CommitteePersonRole(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+    description = models.CharField(max_length=256, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class CommitteePersonManager(models.Manager):
+
+    def addOrUpdate(self, person, committee, voting, role):
+        committeePerson, new = self.get_or_create(person=person, committee=committee)
+        committeePerson.voting = voting
+        committeePerson.role = role
+        committeePerson.save()
+        return committeePerson, new
+
+
+class CommitteePerson(models.Model):
+    person = models.ForeignKey(Person)
+    committee = models.ForeignKey(Committee)
+    voting = models.BooleanField(default=False)
+    role = models.ForeignKey(CommitteePersonRole, blank=True)
+    termStart = models.DateField()
+    termEnd = models.DateField()
+    objects = CommitteePersonManager()
+
+    def __unicode__(self):
+        return "{0}---{1}".format(self.person, self.committee)
 
