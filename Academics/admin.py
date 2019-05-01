@@ -69,6 +69,7 @@ class WithdrawalAdmin(ModelAdmin):
 #
 # class DegreeProgramAdmin(ModelAdmin):
 #     ordering = ('name',)
+admin.site.register(Position)
 admin.site.register(CommitteePersonRole)
 admin.site.register(Committee)
 admin.site.register(CommitteePerson)

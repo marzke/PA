@@ -215,6 +215,71 @@ class EmployeeParent(models.Model):
         )
 
 
+class PositionManager(models.Manager):
+
+    def importFromExcel(self, file):
+        df = pd.read_excel(file, header=1, na_values=['NA'])
+        for i in range(len(df['UIN'])):
+            person, new = Person.objects.get_or_create(username=df['UIN'].iloc[i])
+            if new:
+                person.last_name = df['Last'].iloc[i]
+                person.first_name = df['First Name'].iloc[i]
+            deptID = df['Dept ID'].iloc[i]
+            dept = df['Department'].iloc[i]
+            jobCode = df['Job Code'].iloc[i]
+            grade = df['Grade'].iloc[i]
+            FTCompRate = df['FT Comp Rate'].iloc[i]
+            timeBase = df['Time Base'].iloc[i]
+            monthlySalary = df['Monthly Salary'].iloc[i]
+            positionNumber = df['Position #'].iloc[i]
+            firstHireDate = df['First Hire Date'].iloc[i]
+            effectiveDate = df['Eff Date'].iloc[i]
+            apptEndDate = df['Appt End Date'].iloc[i]
+            payStatus = df['Pay Status'].iloc[i]
+            actionDate = df['Action Date'].iloc[i]
+            position, new = self.get_or_create(
+                person=person, departmentID=deptID, department=dept,
+                jobCode=jobCode, grade=grade, fullTimeCompRate=FTCompRate,
+                timeBase=timeBase, monthlySalary=monthlySalary,
+                positionNumber=positionNumber, firstHireDate=firstHireDate,
+                effectiveDate=effectiveDate,
+                actionDate=actionDate,
+            )
+            #print position, payStatus, position.payStatus
+            #print payStatus == numpy.nan
+            if type(apptEndDate) == datetime.date:
+                position.apptEndDate = apptEndDate
+            if type(payStatus) == unicode:
+                position.payStatus = payStatus
+            #return position
+            position.save()
+
+
+# based on HRMS query SFO_FACULTY_ROSTER_ACTION_DT
+class Position(models.Model):
+
+    jobCode = models.SmallIntegerField()
+    department = models.CharField(max_length=64)
+    departmentID = models.SmallIntegerField()
+    person = models.ForeignKey(Person, blank=True, null=True)
+    grade = models.SmallIntegerField(blank=True, null=True)
+    fullTimeCompRate = models.FloatField(blank=True, null=True)
+    timeBase = models.FloatField()
+    monthlySalary = models.FloatField(blank=True, null=True)
+    positionNumber = models.CharField(max_length=8, blank=True, null=True)
+    firstHireDate = models.DateField(blank=True, null=True)
+    effectiveDate = models.DateField(blank=True, null=True)
+    apptEndDate = models.DateField(blank=True, null=True)
+    payStatus = models.CharField(max_length=16, blank=True, null=True)
+    actionDate = models.DateField(blank=True, null=True)
+
+    objects = PositionManager()
+
+    def __unicode__(self):
+        return "{0}   {1} ({2})".format(self.person, self.jobCode, self.department)
+
+
+
 class InstructorParent(models.Model):
 
     emplid = models.CharField(max_length=11, db_column='EMPLID', primary_key=True)
@@ -2116,43 +2181,43 @@ class SectionPreference(models.Model):
         # from django.urls import reverse
         # return reverse('people.views.details', args=[str(self.id)])
 
-class Position(models.Model):
+# class Position(models.Model):
+#
+#     employees = models.ManyToManyField(Person, through='Appointment')
+#     departmentCode = models.CharField(max_length=4)
+#     positionCode = models.CharField(max_length=2)
 
-    employees = models.ManyToManyField(Person, through='Appointment')
-    departmentCode = models.CharField(max_length=4)
-    positionCode = models.CharField(max_length=2)
 
-
-class Appointment(models.Model):
-
-    person = models.ForeignKey(Person)
-    position = models.ForeignKey(Position)
-    termChoices = (
-        ('Semester','Semester'),
-        ('OneYear', 'OneYear'),
-        ('ThreeYear', 'ThreeYear'),
-    )
-    term = models.SmallIntegerField(choices=termChoices)
-    timeBase = models.DecimalField(decimal_places=2, max_digits=8)
-    monthlyBaseSalary = models.DecimalField(decimal_places=2, max_digits=8)
-    fullTimeWTU = 15.0
-    monthsPerSemester = 6
-
-    def __unicode__(self):
-        return '{0} {1} {2} {3}'.format(self.person.__unicode__(), self.position.__unicode__(),
-                                    self.term, self.timeBase)
-
-    def monthlySalary(self):
-        return self.monthlyBaseSalary * timeBase
-
-    def semesterSalaryForWTU(self, wtu):
-        return self.monthlyBaseSalary * self.timeBaseForWTU(wtu)
-
-    def semesterSalary(self):
-        return self.monthlySalary() * self.monthsPerSemester
-
-    def timeBaseForWTU(self, wtu):
-        return round(wtu / self.fullTimeWTU)
+# class Appointment(models.Model):
+#
+#     person = models.ForeignKey(Person)
+#     position = models.ForeignKey(Position)
+#     termChoices = (
+#         ('Semester','Semester'),
+#         ('OneYear', 'OneYear'),
+#         ('ThreeYear', 'ThreeYear'),
+#     )
+#     term = models.SmallIntegerField(choices=termChoices)
+#     timeBase = models.DecimalField(decimal_places=2, max_digits=8)
+#     monthlyBaseSalary = models.DecimalField(decimal_places=2, max_digits=8)
+#     fullTimeWTU = 15.0
+#     monthsPerSemester = 6
+#
+#     def __unicode__(self):
+#         return '{0} {1} {2} {3}'.format(self.person.__unicode__(), self.position.__unicode__(),
+#                                     self.term, self.timeBase)
+#
+#     def monthlySalary(self):
+#         return self.monthlyBaseSalary * timeBase
+#
+#     def semesterSalaryForWTU(self, wtu):
+#         return self.monthlyBaseSalary * self.timeBaseForWTU(wtu)
+#
+#     def semesterSalary(self):
+#         return self.monthlySalary() * self.monthsPerSemester
+#
+#     def timeBaseForWTU(self, wtu):
+#         return round(wtu / self.fullTimeWTU)
 
 
 class LeaveManager(models.Manager):
