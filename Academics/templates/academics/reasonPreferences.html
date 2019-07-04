@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Withdrawal Preferences</title>
+    {{ formset.media }}
+</head>
+<body>
+<form>
+
+<div class='menu-container'>
+
+    <div class='form-type'><h2>Withdrawal Preferences</h2></div>
+    <div class='name'><h2>{{ request.user.first_name }} {{ request.user.last_name }}</h2></div>
+
+    </div>
+<div class="inputs">
+
+{% load academicsTags %}
+    {% for pref,form in zip %}
+        <div class="input">
+            <div class="reason-info">
+                <div class="reason-selection">
+                    <div class="reason-checkbox">{{ form }}</div>
+                    <div class="reason-identifier">{{ pref.reason.name}}</div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+</form>
+</body>
+</html>
