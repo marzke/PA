@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="45893c50-e691-4cfa-adae-1ce0475e9a95" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/Academics/migrations/0022_auto_20190418_0148.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/migrations/0023_auto_20190418_0253.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/models.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -44,22 +39,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="278">
-              <caret line="248" column="13" selection-start-line="248" selection-start-column="13" selection-end-line="248" selection-end-column="13" />
-              <folding>
-                <element signature="e#0#15#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="225">
+              <caret line="15" column="30" lean-forward="true" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/PA/settings.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="363">
+              <caret line="73" column="28" lean-forward="true" selection-start-line="73" selection-start-column="28" selection-end-line="73" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="253">
+            <state relative-caret-position="1890">
               <caret line="136" column="32" selection-start-line="136" selection-start-column="32" selection-end-line="136" selection-end-column="32" />
               <folding>
                 <element signature="e#0#35#0" expanded="true" />
@@ -68,10 +69,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="forms.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/forms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
+            <state relative-caret-position="540">
               <caret line="38" column="23" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
               <folding>
                 <element signature="e#0#24#0" expanded="true" />
@@ -80,7 +81,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="collegeTTSFR.js" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="60">
@@ -89,16 +90,16 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="admin.py" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/admin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="248">
-              <caret line="63" column="60" lean-forward="true" selection-start-line="63" selection-start-column="60" selection-end-line="63" selection-end-column="60" />
+            <state relative-caret-position="900">
+              <caret line="63" column="60" selection-start-line="63" selection-start-column="60" selection-end-line="63" selection-end-column="60" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="collegeTTSFR.html" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="345">
@@ -110,10 +111,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="collegeTTSFR.css" pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/collegeTTSFR.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="247">
+            <state relative-caret-position="505">
               <caret line="88" column="17" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
             </state>
           </provider>
@@ -198,18 +199,9 @@
       </list>
     </option>
   </component>
-  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsGulpfileManager">
-    <detection-done>true</detection-done>
-    <sorting>DEFINITION_ORDER</sorting>
-  </component>
-  <component name="NodePackageJsonFileManager">
-    <packageJsonPaths />
-  </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="241" />
-    <option name="y" value="32" />
+    <option name="x" value="428" />
+    <option name="y" value="23" />
     <option name="width" value="992" />
     <option name="height" value="822" />
   </component>
@@ -218,54 +210,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope">
-        <subPane subId="Changed Files">
-          <expand>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name=".idea" type="cbb8eebc:String" user=".idea" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-        <subPane subId="Project Files">
-          <expand>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-            </path>
-            <path>
-              <item name="Root" type="cbb8eebc:String" user="Root" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-              <item name="PA" type="cbb8eebc:String" user="PA" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -365,6 +309,54 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope">
+        <subPane subId="Changed Files">
+          <expand>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name=".idea" type="cbb8eebc:String" user=".idea" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+        <subPane subId="Project Files">
+          <expand>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+            </path>
+            <path>
+              <item name="Root" type="cbb8eebc:String" user="Root" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+              <item name="PA" type="cbb8eebc:String" user="PA" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -433,6 +425,9 @@
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
     <configuration name="PA" type="Python.DjangoServer" factoryName="Django server">
       <module name="PA" />
@@ -456,6 +451,7 @@
       <option name="runNoReload" value="false" />
       <option name="useCustomRunCommand" value="false" />
       <option name="customRunCommand" value="" />
+      <method v="2" />
     </configuration>
     <configuration default="true" type="Python.DjangoServer" factoryName="Django server">
       <module name="PA" />
@@ -478,6 +474,7 @@
       <option name="runNoReload" value="false" />
       <option name="useCustomRunCommand" value="false" />
       <option name="customRunCommand" value="" />
+      <method v="2" />
     </configuration>
   </component>
   <component name="StructureViewFactory">
@@ -494,6 +491,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1507749572702</updated>
+      <workItem from="1562112512263" duration="699000" />
     </task>
     <task id="LOCAL-00001" summary="introduce section preference views">
       <created>1512667978738</created>
@@ -572,8 +570,18 @@
       <option name="project" value="LOCAL" />
       <updated>1555534967295</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Add Position and implement importFromExcel">
+      <created>1556725122562</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1556725122562</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="2250000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -585,35 +593,36 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="241" y="32" width="992" height="822" extended-state="0" />
+    <frame x="428" y="23" width="992" height="822" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info anchor="bottom" id="TODO" order="7" weight="0.32857144" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.51473683" side_tool="true" weight="0.20081967" />
-      <window_info anchor="bottom" id="manage.py@PA" order="0" sideWeight="0.48526317" weight="0.32689655" />
-      <window_info anchor="bottom" id="Database Changes" order="14" weight="0.329235" />
-      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.48886827" weight="0.27448276" />
-      <window_info anchor="bottom" id="Version Control" order="11" weight="0.32827586" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="13" sideWeight="0.48526317" visible="true" weight="0.20275863" />
-      <window_info anchor="bottom" id="Terminal" order="15" weight="0.32857144" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.46193773" visible="true" weight="0.21789473" />
-      <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
-      <window_info anchor="right" id="Database" order="3" sideWeight="0.47350428" weight="0.32931355" />
-      <window_info anchor="right" id="SciView" order="4" sideWeight="0.48034188" weight="0.32931355" />
-      <window_info id="Structure" order="1" sideWeight="0.5380623" side_tool="true" visible="true" weight="0.21789473" />
-      <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.45876288" visible="true" weight="0.2263158" />
+      <window_info id="Structure" order="1" sideWeight="0.5412371" side_tool="true" visible="true" weight="0.2263158" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="manage.py@PA" order="0" sideWeight="0.48526317" weight="0.32689655" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="Find" order="2" weight="0.32786885" />
+      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.48886827" weight="0.27448276" />
+      <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="7" weight="0.32857144" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.51578945" side_tool="true" weight="0.20273973" />
+      <window_info anchor="bottom" id="Messages" order="9" />
+      <window_info anchor="bottom" id="Docker" order="10" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="11" weight="0.32827586" />
+      <window_info anchor="bottom" id="File Transfer" order="12" weight="0.32907802" />
+      <window_info anchor="bottom" id="Python Console" order="13" sideWeight="0.48421052" visible="true" weight="0.20273973" />
+      <window_info anchor="bottom" id="Database Changes" order="14" weight="0.329235" />
+      <window_info anchor="bottom" id="Terminal" order="15" weight="0.32857144" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="16" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Database" order="3" sideWeight="0.47350428" weight="0.32931355" />
+      <window_info anchor="right" id="SciView" order="4" sideWeight="0.48034188" weight="0.32931355" />
       <window_info anchor="right" id="Data View" order="5" />
       <window_info anchor="right" x="0" y="0" width="230" height="629" id="Documentation" order="6" sideWeight="0.52649575" side_tool="true" weight="0.32931355" />
-      <window_info anchor="bottom" id="Messages" order="9" />
-      <window_info anchor="bottom" id="Message" order="1" />
-      <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
-      <window_info anchor="bottom" id="File Transfer" order="12" weight="0.32907802" />
-      <window_info anchor="bottom" id="Find" order="2" weight="0.32786885" />
-      <window_info anchor="bottom" id="Concurrent Activities Diagram" order="16" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -654,9 +663,20 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="introduce section preference views" />
@@ -669,12 +689,11 @@
     <MESSAGE value="Withdrawal models" />
     <MESSAGE value="Add course parent model" />
     <MESSAGE value="Add TTSFR and Committees" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add TTSFR and Committees" />
+    <MESSAGE value="Add Position and implement importFromExcel" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Position and implement importFromExcel" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/bootstrap.css">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/bootstrap.css" />
     <entry file="file://$PROJECT_DIR$/Academics/widgets.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
@@ -869,13 +888,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/collegeTTSFR.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="88" column="17" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/EMPLOYEE.sql">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -883,23 +895,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PA/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="423">
-          <caret line="77" column="46" selection-start-line="77" selection-start-column="46" selection-end-line="77" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="53" selection-start-line="23" selection-start-column="53" selection-end-line="23" selection-end-column="53" />
-          <folding>
-            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -917,16 +912,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js">
+    <entry file="file://$PROJECT_DIR$/Academics/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" selection-start-line="4" selection-end-line="4" />
+        <state relative-caret-position="225">
+          <caret line="15" column="30" lean-forward="true" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Academics/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="253">
+        <state relative-caret-position="1890">
           <caret line="136" column="32" selection-start-line="136" selection-start-column="32" selection-end-line="136" selection-end-column="32" />
           <folding>
             <element signature="e#0#35#0" expanded="true" />
@@ -936,7 +931,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Academics/forms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
+        <state relative-caret-position="540">
           <caret line="38" column="23" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
           <folding>
             <element signature="e#0#24#0" expanded="true" />
@@ -944,20 +939,41 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/admin.py">
+    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/js/collegeTTSFR.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="248">
-          <caret line="63" column="60" lean-forward="true" selection-start-line="63" selection-start-column="60" selection-end-line="63" selection-end-column="60" />
+        <state relative-caret-position="60">
+          <caret line="4" selection-start-line="4" selection-end-line="4" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Academics/models.py">
+    <entry file="file://$PROJECT_DIR$/Academics/admin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="248" column="13" selection-start-line="248" selection-start-column="13" selection-end-line="248" selection-end-column="13" />
+        <state relative-caret-position="900">
+          <caret line="63" column="60" selection-start-line="63" selection-start-column="60" selection-end-line="63" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/templates/academics/collegeTTSFR.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="345">
+          <caret line="23" column="53" selection-start-line="23" selection-start-column="53" selection-end-line="23" selection-end-column="53" />
           <folding>
-            <element signature="e#0#15#0" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#0;n#div#1;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PA/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="363">
+          <caret line="73" column="28" lean-forward="true" selection-start-line="73" selection-start-column="28" selection-end-line="73" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Academics/static/Academics/css/collegeTTSFR.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="505">
+          <caret line="88" column="17" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
         </state>
       </provider>
     </entry>
