@@ -78,8 +78,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.oracle',
         'NAME': 'PROD',
         'USER': 'AASCIEPT',
-        'PASSWORD': 'rfmmrw_480',
-        'HOST': 'dbgrid-scan.sfsu.edu',
+        'PASSWORD': 'CMMwasborn_626',
+        'HOST': 'apps-db.sfsu.edu',
         'PORT': '1521',
     }
 }

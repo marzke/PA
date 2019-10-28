@@ -16,10 +16,11 @@ def isInstructor(user):
 def index(request):
     env = request.environ
     print request.user
-    context = {'user':env['USER'],
-               'shell':env['SHELL'],
-               'uid':'900041849',
-               'displayName': 'Ron Marzke'
+    print request.user.username
+    context = {'user':request.user, #env['USER'],
+               #'shell':env['SHELL'],
+               'username':request.user.username,
+               'displayName': request.user.first_name + request.user.last_name
     }
     return render(request, 'academics/index.html', context)
 

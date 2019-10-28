@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, RadioSelect, CheckboxInput
-from .models import SectionPreference, WithdrawalPreferences, Reason, College, Term
+from .models import Section, SectionPreference, WithdrawalPreferences, Reason, College, Term
 
 
 # from Academics.widgets import SectionPreferenceWidget
@@ -44,6 +44,13 @@ class CollegeTTSFRForm(forms.Form):
               'https://unpkg.com/muuri@0.7.1/dist/muuri.min.js',
               'Academics/js/collegeTTSFR.js',
         )
+
+
+class SectionForm(forms.Form):
+    class Meta:
+        model = Section
+        fields = ['session', 'number']
+
 
 
 # w = SectionPreferenceForm()

@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
+from django.contrib.auth.models import AbstractUser, UserManager, Group
 from .fields import *
 from django.db import connections
 from django.core.exceptions import ValidationError
@@ -52,7 +52,7 @@ class WeeklyEvent(models.Model):
         return '{0}  {1} - {2}'.format(self.day, self.startTime, self.endTime)
 
 
-class PersonManager(BaseUserManager):
+class PersonManager(UserManager):
 
     def checkSelfConflicts(self, termNumber=''):
         for person in self.all():
@@ -458,30 +458,155 @@ class GTA(Student):
         verbose_name_plural = 'GTAs'
 
 
+class FinancialDepartmentParent(models.Model):
+    deptid = models.CharField(primary_key=True, max_length=20, db_column='DEPTID')
+    dept_name = models.CharField(max_length=30, db_column='DEPT_NAME')
+    college_deptid = models.CharField(max_length=20, db_column='COLLEGE_DEPTID')
+    college_name = models.CharField(max_length=30, db_column='COLLEGE_NAME')
+    cabinet_deptid = models.CharField(max_length=20, db_column='CABINET_DEPTID')
+    cabinet_name = models.CharField(max_length=30, db_column='CABINET_NAME')
+    cfs_dept_name = models.CharField(max_length=100, db_column='CFS_DEPT_NAME')
+    acad_org = models.CharField(max_length=25, db_column='ACAD_ORG')
+    acad_group = models.CharField(max_length=25, db_column='ACAD_GROUP')
 
+    class Meta:
+        managed = False
+        db_table = 'DEPARTMENT_HIERARCHY_VW'
+
+
+class FinancialDepartmentManager(models.Manager):
+
+    def sync(self):
+        parents = FinancialDepartmentParent.objects.all()
+        for parent in parents:
+            financialDepartment = self.get_or_create(deptID=parent.deptid,
+                                                     deptName=parent.dept_name,
+                                                     college_deptid=parent.college_deptid,
+                                                     college_name=parent.college_name,
+                                                     cabinet_deptid=parent.cabinet_deptid,
+                                                     cfs_dept_name=parent.cfs_dept_name,
+                                                     acad_org=parent.acad_org,
+                                                     acad_group=parent.acad_group,
+                                                     )
+
+
+class FinancialDepartment(models.Model):
+    deptID = models.CharField(max_length=20)
+    deptName = models.CharField(max_length=60)
+    college_deptid = models.CharField(max_length=20)
+    college_name = models.CharField(max_length=60)
+    cabinet_deptid = models.CharField(max_length=20)
+    cabinet_name = models.CharField(max_length=60)
+    cfs_dept_name = models.CharField(max_length=100)
+    acad_org = models.CharField(max_length=25)
+    acad_group = models.CharField(max_length=25)
+    objects = FinancialDepartmentManager()
+
+    def __unicode__(self):
+        return self.deptName
+
+
+class AcademicGroupParent(models.Model):
+    deptID = models.CharField(max_length=20, db_column='DEPTID')
+    deptName = models.CharField(max_length=30, db_column='DEPT_NAME')
+    college_deptid = models.CharField(max_length=4, db_column='COLLEGE_DEPTID')
+    college_name = models.CharField(max_length=100, db_column='COLLEGE_NAME')
+    acad_group = models.CharField(primary_key=True, max_length=3, db_column='ACAD_GROUP')
+    college_nickname = models.CharField(max_length=4, db_column='COLLEGE_NICKNAME')
+
+    class Meta:
+        managed = False
+        db_table = 'COLLEGE_VW'
+
+
+class AcademicGroupManager(models.Manager):
+
+    def sync(self):
+        parents = AcademicGroupParent.objects.all()
+        for parent in parents:
+            print parent.deptID
+            try:
+                financialDepartment = FinancialDepartment.objects.get(deptID=parent.deptID)
+            except:
+                print 'Financial Department does not yet exist'
+                return
+            try:
+                acadGroup = self.get(financialDepartment=financialDepartment)
+            except:
+                acadGroup = AcademicGroup(name=parent.college_name,
+                                           nickname = parent.college_nickname,
+                                           number = parent.acad_group,
+                                           financialDepartment = financialDepartment,
+                                           )
+                acadGroup.save()
 
 
 class AcademicGroup(models.Model):
-    name = models.CharField(max_length=30)
-    description = models.CharField(max_length=60, blank=True, null=True)
+    name = models.CharField(max_length=100)
+    nickname = models.CharField(max_length=60, blank=True, null=True)
+    number = models.CharField(max_length=5, blank=True, null=True)
+    financialDepartment = models.ForeignKey(FinancialDepartment, blank=True, null=True)
+    objects = AcademicGroupManager()
     #admins = models.ManyToManyField(Person, related_name='academic_groups_as_admin', blank=True)
 
     def __unicode__(self):
-        return self.description
+        return self.name
+
+
+class AcademicOrganizationParent(models.Model):
+    acad_org = models.CharField(primary_key=True ,max_length=10, db_column='ACAD_ORG')
+    deptID = models.CharField(max_length=20, db_column='DEPTID')
+    deptName = models.CharField(max_length=30, db_column='DEPT_NAME')
+    acad_group = models.CharField(max_length=3, db_column='ACAD_GROUP')
+
+    class Meta:
+        managed = False
+        db_table = 'DEPARTMENT_VW'
+
+
+class AcademicOrganizationManager(models.Manager):
+
+    def sync(self):
+        parents = AcademicOrganizationParent.objects.all()
+        for parent in parents:
+            print parent.acad_org
+            try:
+                financialDepartment = FinancialDepartment.objects.get(deptID=parent.deptID)
+            except:
+                print 'Financial Department does not yet exist'
+                financialDepartment = None
+            try:
+                acadGroup = AcademicGroup.objects.get(number=parent.acad_group)
+            except:
+                print 'Academic Group does not yet exist'
+                acadGroup = None
+            try:
+                acadOrg = self.get(acad_org=parent.acad_org)
+            except:
+                acadOrg = AcademicOrganization(name=parent.deptName,
+                                               acad_org=parent.acad_org,
+                                               academicGroup=acadGroup,
+                                               financialDepartment=financialDepartment,
+                                               )
+                acadOrg.save()
 
 
 class AcademicOrganization(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
-    description = models.CharField(max_length=60, blank=True, null=True)
-    #admins = models.ManyToManyField(Person, related_name='academic_orgs_as_admin', blank=True)
+    nickname = models.CharField(max_length=32, blank=True, null=True)
+    acad_org = models.CharField(max_length=10, blank=True, null=True)
+    academicGroup = models.ForeignKey(AcademicGroup, blank=True, null=True)
+    financialDepartment = models.ForeignKey(FinancialDepartment, blank=True, null=True)
+    objects = AcademicOrganizationManager()
 
     def __unicode__(self):
-        return self.description
+        return self.name
 
     def TTSFR(self, termNumber):
         #people = Person.objects.filter(acad_org=self, term__number=termNumber)
         sections = Section.objects.filter(session__course__subject__host=self,
                                           session__term__number=termNumber)
+        # 7/22/2019 Change to self.section_set.filter(session__term__number=termNumber)
         ftes = 0.
         for section in sections:
             ftes += section.FTES()
@@ -533,7 +658,7 @@ class Subject(models.Model):
         return (self.name,)
 
 
-class CourseType(models.Model):
+class Component(models.Model):
     name = models.CharField(max_length=8, choices=(
         ('LEC', 'Lecture'),
         ('LAB', 'Lab'),
@@ -541,9 +666,17 @@ class CourseType(models.Model):
         ('SUP', 'Supervision'),
         ('ACT', 'Activity'),
         ('FLD', 'Field Studies'),
-    )
-    )
+    ))
     description = models.CharField(max_length=60, blank=True, null=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class CourseComponent(models.Model):
+    course = models.ForeignKey('CourseDefinition')
+    component = models.ForeignKey(Component)
+    units = models.SmallIntegerField()
 
     def __unicode__(self):
         return self.name
@@ -568,12 +701,98 @@ class KFactor(models.Model):
         return 'KFactor({0}) = {1}'.format(self.CSNumber, self.factor)
 
 
-class CourseParent(models.Model):
-
-    minstrm = models.CharField(max_length=4, db_column='MINSTRM')
-    maxstrm = models.CharField(max_length=4, db_column='MAXSTRM')
+class CourseOfferParent(models.Model):
     subject = models.CharField(max_length=8, db_column='SUBJECT')
     catalog_nbr = models.CharField(max_length=10, db_column='CATALOG_NBR')
+    crse_id = models.CharField(max_length=6, db_column='CRSE_ID')
+    effdt = models.DateTimeField(db_column='EFFDT')
+    crse_offer_nbr = models.IntegerField(db_column='CRSE_OFFER_NBR')
+    acad_group = models.CharField(max_length=5, db_column='ACAD_GROUP')
+    acad_org = models.CharField(max_length=10, db_column='ACAD_ORG')
+    acad_career = models.CharField(max_length=4, db_column='ACAD_CAREER')
+
+    class Meta:
+        managed = False
+        db_table = '"CMSCOMMON"."SFO_CRSE_OFFER"'
+
+
+class CourseDefinitionParent(models.Model):
+    crse_id = models.CharField(max_length=6, db_column='CRSE_ID')
+    effdt = models.DateTimeField(db_column='EFFDT')
+    eff_status = models.CharField(max_length=1, db_column='EFF_STATUS')
+    descr = models.CharField(max_length=30, db_column='DESCR')
+    course_title_long = models.CharField(max_length=100, db_column='COURSE_TITLE_LONG')
+    units_acad_prog = models.SmallIntegerField(db_column='UNITS_ACAD_PROG')
+    crse_contact_hrs = models.SmallIntegerField(db_column='CRSE_CONTACT_HRS')
+    descrlong = models.CharField(max_length=4000, db_column='DESCRLONG')
+    fees_exist = models.CharField(max_length=1, db_column='FEES_EXIST')
+
+    class Meta:
+        managed = False
+        db_table = '"CMSCOMMON"."SFO_CRSE_CATALOG"'
+
+
+class CourseDefinitionManager(models.Manager):
+
+    def sync(self):
+
+        courseDefinitionParents = CourseDefinitionParent.objects.all()
+
+        for courseDefinitionParent in courseDefinitionParents:
+
+            courseDefinition = self.get(courseID=courseParent.crse_id,
+                                        effectiveDate=courseDefinitionParent.effdt,
+            )
+            courseDefinition.effectiveStatus = courseDefinitionParent.eff_status
+            courseDefinition.title = courseDefinitionParent.course_title_long.strip()
+            courseDefinition.description = courseDefinitionParent.descrlong.strip()
+            courseDefinition.units = courseParent.units_acad_prog
+            courseDefinition.contactHours = courseDefinitionParent.crse_contact_hrs
+            course.save()
+
+
+class CourseDefinition(models.Model):
+    courseID = models.CharField(max_length=6)
+    effectiveDate = models.DateTimeField()
+    effectiveStatus = models.CharField(max_length=1)
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=4000)
+    components = models.ManyToManyField('Component', through='CourseComponent', blank=True)
+    units = models.SmallIntegerField()
+    contactHours = models.SmallIntegerField()
+    objects = CourseDefinitionManager()
+
+    class Meta:
+        unique_together = ('courseID', 'effectiveDate')
+
+
+class CourseAttributeParent(models.Model):
+    crse_id = models.CharField(max_length=6, db_column='CRSE_ID')
+    crse_offer_nbr = models.IntegerField(db_column='CRSE_OFFER_NBR')
+    strm = models.CharField(max_length=4, db_column='STRM')
+    session_code = models.CharField(max_length=3, db_column='SESSION_CODE')
+    class_section = models.CharField(max_length=4, db_column='CLASS_SECTION')
+    crse_attr = models.CharField(max_length=4, db_column='CRSE_ATTR')
+    crse_attr_value = models.CharField(max_length=10, db_column='CRSE_ATTR_VALUE')
+
+    class Meta:
+        managed = False
+        db_table = '"CMSCOMMON"."SFO_CLASS_ATTRIBUTE"'
+
+
+class CourseAttributeValueParent(models.Model):
+    crse_attr = models.CharField(max_length=4, db_column='CRSE_ATTR')
+    effdt = models.DateTimeField(db_column='EFFDT')
+    crse_attr_value = models.CharField(max_length=10, db_column='CRSE_ATTR_VALUE')
+    descr = models.CharField(max_length=30, db_column='DESCR')
+    descrformal = models.CharField(max_length=50, db_column='DESCRFORMAL')
+
+    class Meta:
+        managed = False
+        db_table = '"CMSCOMMON"."SFO_CRSE_ATTR_VALUE"'
+
+
+class CourseParent(models.Model):
     acad_group = models.CharField(max_length=5, db_column='ACAD_GROUP')
     acad_org = models.CharField(max_length=10, db_column='ACAD_ORG')
     crse_id = models.CharField(max_length=6, db_column='CRSE_ID', primary_key=True)
@@ -582,11 +801,12 @@ class CourseParent(models.Model):
     crse_contact_hrs = models.SmallIntegerField(db_column='CRSE_CONTACT_HRS')
     descrlong = models.CharField(max_length=4000, db_column='DESCRLONG')
     effdt = models.DateField(db_column='EFFDT')
+    fees_exist = models.CharField(max_length=1, db_column='FEES_EXIST')
 
 
     class Meta:
         managed = False
-        db_table = 'COURSE_VW'
+        db_table = 'SFO_CRSE_CATALOG_EFF'
 
     def __unicode__(self):
         return '{0}  {1}  {2}'.format(
@@ -605,6 +825,7 @@ class CourseManager(models.Manager):
                 course = self.get(
                     subject__name=courseParent.subject.strip(),
                     number=courseParent.catalog_nbr.strip(),
+                    courseID=courseParent.crse_id.strip(),
                 )
             except:
                 subject, new = Subject.objects.get_or_create(
@@ -612,7 +833,7 @@ class CourseManager(models.Manager):
                 )
                 if new:
                     host, new = AcademicOrganization.objects.get_or_create(
-                        description=courseParent.acad_org.strip()
+                        acad_org=courseParent.acad_org.strip()
                     )
                     subject.host = host
                     subject.save()
@@ -620,37 +841,45 @@ class CourseManager(models.Manager):
                 course, new = Course.objects.get_or_create(
                     subject=subject,
                     number=courseParent.catalog_nbr.strip(),
+                    courseID=courseParent.crse_id.strip(),
+
                     #title=sectionParent.course_title_long.strip()
                 )
             course.title = courseParent.course_title_long.strip()
             course.description = courseParent.descrlong.strip()
-            course.units = courseParent.units_acad_prog
+            #course.units = courseParent.units_acad_prog MOVE UNITS TO COURSE COMPONENTS
             print course
             course.save()
 
 
+
+
+class CourseAttributeManager(models.Manager):
+
+    def sync(self):
+        pass
+
+
+class CourseAttribute(models.Model):
+    name = models.CharField(max_length=4)
+    value = models.CharField(max_length=10)
+    objects = CourseAttributeManager()
+
+
+class Cadence(models.Model):
+    terms = models.CharField(max_length=30, blank=True)
+    years = models.CharField(max_length=30, blank=True)
+
+    def check_term(self, term):
+        pass #if term meets cadence conditions return True
+
+
 class Course(models.Model):
+    definition = models.ForeignKey(CourseDefinition, blank=True, null=True)
     subject = models.ForeignKey(Subject)
     number = models.CharField(max_length=8)
-    title = models.CharField(max_length=128, blank=True, null=True)
-    description = models.CharField(max_length=4000, blank=True)
-    units = models.SmallIntegerField(blank=True, null=True)
-    contactHours = models.SmallIntegerField(blank=True, null=True)
-    semestersOffered = models.CharField(max_length=16,
-        blank=True, choices=(
-        ('', 'Unknown'),
-        ('FallSpring','Fall and Spring'),
-        ('Fall','Fall'),
-        ('Spring','Spring'),
-    ))
-    yearsOffered = models.CharField(max_length=16,
-        blank=True, choices=(
-        ('', 'Unknown'),
-        ('EvenOdd', 'Even and Odd'),
-        ('Even','Even'),
-        ('Odd','Odd'),
-    ))
-    #courseType = models.ForeignKey(CourseType)   moved to Section!
+    attributes = models.ManyToManyField('CourseAttribute', blank=True)
+    cadence = models.ForeignKey(Cadence, blank=True, null=True)
     prerequisites = models.ManyToManyField('self', blank=True,
                                            symmetrical=False,
                                            through='Prerequisite',
@@ -663,7 +892,6 @@ class Course(models.Model):
                                            through='StudentGrade',
                                            related_name='courseGrades'
     )
-
     objects = CourseManager()
 
     class Meta:
@@ -672,6 +900,11 @@ class Course(models.Model):
     def __unicode__(self):
         return self.subject.__unicode__() + self.number.strip()
 
+    def units(self):
+        units = 0
+        for component in self.components:
+            units += component.units
+        return units
 
 class Prerequisite(models.Model):
     requiredForCourse = models.ForeignKey(Course,
@@ -706,11 +939,56 @@ class StudentGrade(models.Model):
                self.grade.letterGrade + ' in ' + self.course.__unicode__()
 
 
+class TermParent(models.Model):
+    strm = models.CharField(max_length=4, db_column='STRM', primary_key=True)
+    descr = models.CharField(max_length=30, db_column='DESCR')
+    descrshort = models.CharField(max_length=10, db_column='DESCRSHORT')
+    term_begin_dt = models.DateField(db_column='TERM_BEGIN_DT')
+    term_end_dt = models.DateField(db_column='TERM_END_DT')
+    session_code = models.CharField(max_length=3, db_column='SESSION_CODE')
+    weeks_of_instruct = models.IntegerField(db_column='WEEKS_OF_INSTRUCT')
+    term_category = models.CharField(max_length=1, db_column='TERM_CATEGORY')
+    acad_year = models.CharField(max_length=4, db_column='ACAD_YEAR')
+
+    class Meta:
+        managed = False
+        db_table = '"CMSCOMMON"."SFO_TERM_TBL"'
+
+    def __unicode__(self):
+        return self.descr
+
+
 class TermManager(models.Manager):
+
     def get_or_create_from_number(self, number):
         year = '{0}0{1}'.format(number[0], number[1:3])
         season = number[3]
         return self.get_or_create(season=season, year=year)
+
+    def sync(self):
+
+        termParents = TermParent.objects.all()
+
+        for termParent in termParents:
+            try:
+                term = self.get(
+                    term__number=termParent.strm,
+                )
+            except:
+                term, new = Term.objects.get_or_create_from_number(
+                    termParent.strm
+                )
+                print term, new
+            term.startDate = termParent.term_begin_dt
+            term.endDate = termParent.term_end_dt
+            term.descr = termParent.descr
+            term.descrshort = termParent.descrshort
+            term.sessionCode = termParent.session_code
+            term.weeksOfInstruct = termParent.weeks_of_instruct
+            term.termCategory = termParent.term_category
+            term.academicYear = termParent.acad_year
+            term.save()
+
 
 
 class Term(models.Model):
@@ -725,6 +1003,12 @@ class Term(models.Model):
     number = models.CharField(max_length=4, unique=True)
     startDate = models.DateField(blank=True, null=True)
     endDate = models.DateField(blank=True, null=True)
+    descr = models.CharField(max_length=30, blank=True, null=True)
+    descrshort = models.CharField(max_length=10, blank=True, null=True)
+    sessionCode = models.CharField(max_length=3, blank=True, null=True)
+    weeksOfInstruct = models.IntegerField(blank=True, null=True)
+    termCategory = models.CharField(max_length=1, blank=True, null=True)
+    academicYear = models.CharField(max_length=4, blank=True, null=True)
     instructors = models.ManyToManyField('Person', blank=True, through='TermInstructor')
     objects = TermManager()
 
@@ -741,6 +1025,32 @@ class Term(models.Model):
 
     def __unicode__(self):
         return self.get_season_display() + self.year
+
+    def snap(self):
+        EnrollmentSnapshot.objects.snap(self)
+
+
+class EnrollmentSnapshotManager(models.Manager):
+
+    def snap(self, term):
+        sections = Section.objects.filter(session__term=term)
+        for section in sections:
+            enrollmentSnapshot=self.create(section=section,
+                                                  date=datetime.datetime.now(),
+                                                  enrollCap=section.enrollCap,
+                                                  enrolled=section.enrolled,
+                                                  waitlistCap=section.waitlistCap,
+                                                  waitlisted=section.waitlised)
+
+
+class EnrollmentSnapshot(models.Model):
+    section = models.ForeignKey('Section')
+    date = models.DateTimeField(auto_now=True)
+    enrollCap = models.SmallIntegerField()
+    enrolled = models.SmallIntegerField()
+    waitlistCap = models.SmallIntegerField()
+    waitlisted = models.SmallIntegerField()
+    objects = EnrollmentSnapshotManager()
 
 
 class SessionCorrelation(models.Model):
@@ -837,6 +1147,75 @@ class ParentRouter(object):
 
 class SectionParent(models.Model):
     id = models.IntegerField(primary_key=True, db_column='ID')
+    institution = models.CharField(max_length=5, db_column='INSTITUTION')
+    strm = models.CharField(max_length=4, db_column='STRM')
+    courseID = models.CharField(max_length=6, db_column='CRSE_ID')
+    sessionCode = models.CharField(max_length=3, db_column='SESSION_CODE')
+    courseOfferNumber = models.IntegerField(db_column='CRSE_OFFER_NBR')
+    classSection = models.CharField(max_length=4, db_column='CLASS_SECTION')
+    classNumber = models.IntegerField(db_column='CLASS_NBR')
+    acadGroup = models.CharField(max_length=5, db_column='ACAD_GROUP')
+    acadOrg = models.CharField(max_length=10, db_column='ACAD_ORG')
+    subject = models.CharField(max_length=8, db_column='SUBJECT')
+    catalogNumber = models.CharField(max_length=10, db_column='CATALOG_NBR')
+    associatedClass = models.IntegerField(db_column='ASSOCIATED_CLASS')
+    autoEnrollSect1 = models.CharField(max_length=4, db_column='AUTO_ENROLL_SECT_1')
+    courseDescription = models.CharField(max_length=30, db_column='DESCR')
+    courseTopicID = models.IntegerField(db_column='CRS_TOPIC_ID')
+    classMeetingNumber = models.IntegerField(db_column='CLASS_MTG_NBR')
+    csuCOCSNumber = models.CharField(max_length=2, db_column='CSU_CO_CS_NUMBER')
+    courseComponent = models.CharField(max_length=3, db_column='SSR_COMPONENT')
+    studentCreditUnits = models.IntegerField(db_column='CSU_APDB_CMP_UNITS')
+    tbaHours = models.DecimalField(max_digits=5, decimal_places=2, db_column='CSU_APDB_TBA_HOURS')
+    learningMode = models.CharField(max_length=2, db_column='CSU_APDB_LRNG_MODE')
+    startDate = models.DateTimeField(db_column='START_DATE')
+    endDate = models.DateTimeField(db_column='END_DATE')
+    facilityID = models.CharField(max_length=10, db_column='FACILITY_ID')
+    standardMeetingPattern = models.CharField(max_length=4, db_column='STND_MTG_PAT')
+    meetingTimeStart = models.DateTimeField(db_column='MEETING_TIME_START')
+    meetingTimeEnd = models.DateTimeField(db_column='MEETING_TIME_END')
+    enrollCap = models.IntegerField(db_column='ENRL_CAP')
+    enrollTotal = models.IntegerField(db_column='ENRL_TOT')
+    waitCap = models.IntegerField(db_column='WAIT_CAP')
+    waitTotal = models.IntegerField(db_column='WAIT_TOT')
+    instructorLastName = models.CharField(max_length=30, db_column='LAST_NAME')
+    instructorFirstName = models.CharField(max_length=30, db_column='FIRST_NAME')
+    instructorID = models.CharField(max_length=9, db_column='EMPLID')
+    schedulePrint = models.CharField(max_length=1, db_column='SCHEDULE_PRINT')
+    classStatus = models.CharField(max_length=1, db_column='CLASS_STAT')
+    enrollStatus = models.CharField(max_length=1, db_column='ENRL_STAT')
+    classType = models.CharField(max_length=1, db_column='CLASS_TYPE')
+    acadCareer = models.CharField(max_length=4, db_column='ACAD_CAREER')
+    sectionCombinedID = models.CharField(max_length=4, db_column='SCTN_COMBINED_ID')
+    minimumUnits = models.IntegerField(db_column='UNITS_MINIMUM')
+    maximumUnits = models.IntegerField(db_column='UNITS_MAXIMUM')
+    instructorAssignSequence = models.IntegerField(db_column='INSTR_ASSIGN_SEQ')
+    instructorLoadFactor = models.IntegerField(db_column='INSTR_LOAD_FACTOR')
+    schedulePrintInstructor = models.CharField(max_length=1, db_column='SCHED_PRINT_INSTR')
+    instructorRole = models.CharField(max_length=4, db_column='INSTR_ROLE')
+    employeeRecord = models.IntegerField(db_column='EMPL_RCD')
+    sfoCourseTopicTL = models.CharField(max_length=30, db_column='SFO_CRSE_TPC_TL')
+    classNoteNumber = models.CharField(max_length=4, db_column='CLASS_NOTE_NBR')
+    fte = models.DecimalField(max_digits=5, decimal_places=2, db_column='SFO_OSB_FTE')
+    departmentName = models.CharField(max_length=30, db_column='SFO_DEPT_NAME')
+    jobCode = models.CharField(max_length=6, db_column='JOBCODE')
+    roomCharacteristic = models.CharField(max_length=2, db_column='ROOM_CHRSTC')
+    weekWorkloadHours = models.IntegerField(db_column='WEEK_WORKLOAD_HRS')
+    generalAssign = models.CharField(max_length=1, db_column='GENERL_ASSIGN')
+
+    class Meta:
+        managed = False
+        db_table = 'SFO_CS_OSB1_VW'
+
+    def __unicode__(self):
+        return "{0} {1}{2}.{3}".format(self.strm, self.subject,
+                                 self.catalogNumber,
+                                  self.classSection)
+
+
+
+class DeprecatedSectionParent(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='ID')
     strm = models.CharField(max_length=4, db_column='STRM')
     classNumber = models.IntegerField(db_column='CLASS_NBR')
     courseID = models.CharField(max_length=6, db_column='CRSE_ID')
@@ -909,19 +1288,16 @@ class SectionManager(models.Manager):
                     sectionParent.strm.strip()
                 )
                 if new:
-                    startDate = datetime.datetime.strptime(sectionParent.startDate, '%d-%b-%Y').date()
-                    term.startDate = startDate
-                    endDate = datetime.datetime.strptime(sectionParent.endDate, '%d-%b-%Y').date()
-                    term.endDate = endDate
+                    term.startDate = sectionParent.startDate.date()
+                    term.endDate = sectionParent.endDate.date()
                     term.save()
-                #print term, new
+                print term, new
                 subject, new = Subject.objects.get_or_create(
                     name=sectionParent.subject.strip()
                 )
                 print subject, new
-
-                courseType, new = CourseType.objects.get_or_create(
-                    name=sectionParent.courseType)
+                courseComponent, new = CourseComponent.objects.get_or_create(
+                    name=sectionParent.courseComponent)
                 course, new = Course.objects.get_or_create(
                     subject=subject,
                     number=sectionParent.catalogNumber.strip(),
@@ -1169,14 +1545,24 @@ class SectionManager(models.Manager):
                 out.close()
 
 
+class SectionInstructor(models.Model):
+    instructor = models.ForeignKey(Person)
+    section = models.ForeignKey('Section')
+    fraction = models.DecimalField(max_digits=3, decimal_places=2, default=1.0)
+    role = models.CharField(max_length=4, blank=True, null=True)
+    sequence = models.IntegerField(blank=True, null=True)
+    wtu = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
+    schedulePrint = models.BooleanField(default=True)
+
+
 class Section(models.Model):
     session = models.ForeignKey(Session)
     number = models.CharField(max_length=4)
     classNumber = models.IntegerField()
-    courseType = models.ForeignKey(CourseType)
+    courseComponent = models.ForeignKey(CourseComponent, blank=True, null=True)
     kFactor = models.ForeignKey(KFactor, blank=True, null=True)
-    instructor = models.ForeignKey(Person, blank=True, null=True,
-                                   related_name='sectionsAsInstructor')
+    instructors = models.ManyToManyField(Person, blank=True, through='SectionInstructor',
+                                         related_name='sections_as_instructor')
     meetings = models.ManyToManyField(WeeklyEvent, blank=True)
     meetDays = models.CharField(max_length=32, blank=True, null=True)
     startTime = models.TimeField(blank=True, null=True)
@@ -1186,7 +1572,7 @@ class Section(models.Model):
     enrollCap = models.IntegerField(blank=True, null=True)
     waitCap = models.IntegerField(blank=True, null=True)
 
-    enrollingStatus = models.CharField(max_length=1, blank=True, null=True)
+    enrollStatus = models.CharField(max_length=1, blank=True, null=True)
     classStatus = models.CharField(max_length=1, blank=True, null=True)
     classType = models.CharField(max_length=1, blank=True, null=True)
     associatedClass = models.IntegerField(blank=True, null=True)
@@ -1243,22 +1629,28 @@ class Section(models.Model):
         return float(self.countEnrolledStudents() >= 100)
 
     def projectedWTU(self):
-        return self.kFactor * self.session.course.units + self.projectedEnrollmentWTU()
+        return self.kFactor * self.session.course.units() + self.projectedEnrollmentWTU()
 
     def actualWTU(self):
-        return self.session.course.units * self.kFactor + self.actualEnrollmentWTU()
+        return self.session.course.units() * self.kFactor + self.actualEnrollmentWTU()
 
     def projectedCost(self):
-        return self.instructor.semesterSalaryForWTU(self.projectedWTU())
+        cost = 0.
+        for instructor in self.instructors:
+            cost += instructor.semesterSalaryForWTU(self.projectedWTU())
+        return cost
 
     def actualCost(self):
-        return self.instructor.semesterSalaryForWTU(self.actualWTU)
+        cost = 0.
+        for instructor in self.instructors:
+            cost += instructor.semesterSalaryForWTU(self.actualWTU)
+        return cost
 
     def FTES(self):
         if self.acadCareer == 'UGRD':
-            return self.session.course.units * self.countEnrolledStudents()/15.
+            return self.session.course.units() * self.countEnrolledStudents()/15.
         else:
-            return self.session.course.units * self.countEnrolledStudents()/12.
+            return self.session.course.units() * self.countEnrolledStudents()/12.
 
 
     def conflictsWith(self, other):
@@ -1658,7 +2050,7 @@ class Withdrawal(models.Model):
 #         count = 0
 #         for degreeCourse in self.degreeCourses.all():
 #             if degreeCourse.passed(student):
-#                 count += degreeCourse.course.units
+#                 count += degreeCourse.course.units()
 #                 if count >= self.units:
 #                     return True
 #         return False
@@ -1689,7 +2081,6 @@ class DegreeStudentParent(models.Model):
 
 
 class DegreeParent(models.Model):
-
     academicPlan = models.CharField(max_length=10, db_column='ACAD_PLAN', primary_key=True)
     academicOrganization = models.CharField(max_length=10, db_column='ACAD_ORG')
     dateCreated = models.DateTimeField(blank=True, null=True, db_column='DATE_CREATED')
