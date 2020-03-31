@@ -28,7 +28,10 @@ class SubjectAdmin(ModelAdmin):
     ordering = ('name',)
 
 class CourseAdmin(ModelAdmin):
-    ordering = ('subject__name', 'number',)
+    ordering = ('subject__name', 'number','effectiveDate')
+
+class CourseAttributeAdmin(ModelAdmin):
+    ordering = ('name', 'value',)
 
 class SessionAdmin(ModelAdmin):
     ordering = ('term__number', 'course__subject__name', 'course__number',)
@@ -96,7 +99,7 @@ admin.site.register(Session, SessionAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(SectionStudent, SectionStudentAdmin)
 admin.site.register(CourseComponent)
-admin.site.register(CourseAttribute)
+admin.site.register(CourseAttribute, CourseAttributeAdmin)
 admin.site.register(Cadence)
 admin.site.register(FinancialDepartment)
 #admin.site.register(ExamScore, ExamScoreAdmin)
@@ -114,3 +117,4 @@ admin.site.register(WithdrawalPreferences)
 admin.site.register(Withdrawal)
 admin.site.register(Reason)
 admin.site.register(WithdrawalReason)
+admin.site.register(GradingBasis)

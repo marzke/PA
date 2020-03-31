@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig authType="PASSWORD" host="celia.sfsu.edu" id="c5a693e4-d8c6-419a-94cd-c40b7eed7c88" port="22" nameFormat="DESCRIPTIVE" username="marzke" />
+    </configs>
+  </component>
+</project>

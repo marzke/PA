@@ -566,6 +566,9 @@ class AcademicOrganizationParent(models.Model):
 
 class AcademicOrganizationManager(models.Manager):
 
+# todo Handle exceptions
+# todo edit DEPARTMENT_HIERARCHY view to get 131 - *
+
     def sync(self):
         parents = AcademicOrganizationParent.objects.all()
         for parent in parents:
@@ -600,7 +603,7 @@ class AcademicOrganization(models.Model):
     objects = AcademicOrganizationManager()
 
     def __unicode__(self):
-        return self.name
+        return self.acad_org
 
     def TTSFR(self, termNumber):
         #people = Person.objects.filter(acad_org=self, term__number=termNumber)
@@ -659,14 +662,7 @@ class Subject(models.Model):
 
 
 class Component(models.Model):
-    name = models.CharField(max_length=8, choices=(
-        ('LEC', 'Lecture'),
-        ('LAB', 'Lab'),
-        ('SEM', 'Seminar'),
-        ('SUP', 'Supervision'),
-        ('ACT', 'Activity'),
-        ('FLD', 'Field Studies'),
-    ))
+    name = models.CharField(max_length=8)
     description = models.CharField(max_length=60, blank=True, null=True)
 
     def __unicode__(self):
@@ -674,12 +670,44 @@ class Component(models.Model):
 
 
 class CourseComponent(models.Model):
-    course = models.ForeignKey('CourseDefinition')
+    course = models.ForeignKey('Course')
     component = models.ForeignKey(Component)
     units = models.SmallIntegerField()
 
     def __unicode__(self):
         return self.name
+
+
+class GradingBasis(models.Model):
+    choice = models.CharField(max_length=3, choices=(
+        ('OPT','Plus/Minus Letter or CR/NC'),
+        ('GRD', 'Plus/Minus Letter'),
+        ('CNC', 'Credit / No-Credit'),
+        ('SFQ', 'Plus/Minus ABC/NC'),
+        ('SFW', 'ABC/NC'),
+        ('SFJ', 'Plus/Minus AB/NC'),
+        ('SFG', 'SFG: Grad supervision, allows RP'),
+        ('SFI', 'SFI: Grad supervision, allows RP'),
+        ('CEU', 'CEL'),
+        ('NOG', 'Non graded (culminating experience)'),
+        ('NON', 'Non-graded section of multisection class'),
+        ('ADM', 'Administratively Determined'),
+        ('AUD', 'Audit')
+    ))
+    # plusMinus = models.BooleanField()
+    # letters = models.CharField(max_length=5)
+    # credit = models.BooleanField()
+    # noCredit = models.BooleanField()
+    # reportProgress = models.BooleanField()
+    #
+    # def convert(self, toGradingBasis, academicCareer):
+
+
+    class Meta:
+        verbose_name_plural = "Grading Bases"
+
+    def __unicode__(self):
+        return self.choice
 
 
 class KFactorManager(models.Manager):
@@ -701,170 +729,175 @@ class KFactor(models.Model):
         return 'KFactor({0}) = {1}'.format(self.CSNumber, self.factor)
 
 
-class CourseOfferParent(models.Model):
+class CourseParent(models.Model):
+    crse_id = models.CharField(max_length=6, db_column='CRSE_ID', primary_key=True)
+    effdt = models.DateField(db_column='EFFDT')
+    eff_status = models.CharField(max_length=1, db_column='EFF_STATUS')
+    course_title_long = models.CharField(max_length=100, db_column='COURSE_TITLE_LONG')
+    descrlong = models.CharField(max_length=4000, db_column='DESCRLONG')
+    component_primary = models.CharField(max_length=3, db_column='COMPONENT_PRIMARY')
+    units_acad_prog = models.SmallIntegerField(db_column='UNITS_ACAD_PROG')
+    crse_contact_hrs = models.SmallIntegerField(db_column='CRSE_CONTACT_HRS')
+    fees_exist = models.CharField(max_length=1, db_column='FEES_EXIST')
+    crse_offer_nbr = models.IntegerField()
     subject = models.CharField(max_length=8, db_column='SUBJECT')
     catalog_nbr = models.CharField(max_length=10, db_column='CATALOG_NBR')
-    crse_id = models.CharField(max_length=6, db_column='CRSE_ID')
-    effdt = models.DateTimeField(db_column='EFFDT')
-    crse_offer_nbr = models.IntegerField(db_column='CRSE_OFFER_NBR')
     acad_group = models.CharField(max_length=5, db_column='ACAD_GROUP')
     acad_org = models.CharField(max_length=10, db_column='ACAD_ORG')
     acad_career = models.CharField(max_length=4, db_column='ACAD_CAREER')
 
     class Meta:
         managed = False
-        db_table = '"CMSCOMMON"."SFO_CRSE_OFFER"'
+        db_table = 'CURRENT_COURSE_VW'
 
 
-class CourseDefinitionParent(models.Model):
-    crse_id = models.CharField(max_length=6, db_column='CRSE_ID')
-    effdt = models.DateTimeField(db_column='EFFDT')
-    eff_status = models.CharField(max_length=1, db_column='EFF_STATUS')
-    descr = models.CharField(max_length=30, db_column='DESCR')
-    course_title_long = models.CharField(max_length=100, db_column='COURSE_TITLE_LONG')
-    units_acad_prog = models.SmallIntegerField(db_column='UNITS_ACAD_PROG')
-    crse_contact_hrs = models.SmallIntegerField(db_column='CRSE_CONTACT_HRS')
-    descrlong = models.CharField(max_length=4000, db_column='DESCRLONG')
-    fees_exist = models.CharField(max_length=1, db_column='FEES_EXIST')
+class CourseManager(models.Manager):
 
-    class Meta:
-        managed = False
-        db_table = '"CMSCOMMON"."SFO_CRSE_CATALOG"'
-
-
-class CourseDefinitionManager(models.Manager):
-
-    def sync(self):
-
-        courseDefinitionParents = CourseDefinitionParent.objects.all()
-
-        for courseDefinitionParent in courseDefinitionParents:
-
-            courseDefinition = self.get(courseID=courseParent.crse_id,
-                                        effectiveDate=courseDefinitionParent.effdt,
-            )
-            courseDefinition.effectiveStatus = courseDefinitionParent.eff_status
-            courseDefinition.title = courseDefinitionParent.course_title_long.strip()
-            courseDefinition.description = courseDefinitionParent.descrlong.strip()
-            courseDefinition.units = courseParent.units_acad_prog
-            courseDefinition.contactHours = courseDefinitionParent.crse_contact_hrs
+    def sync(self, **kwargs):
+        parents = CourseParent.objects.filter(**kwargs)
+        for parent in parents:
+            try:
+                course = self.get(
+                    subject__name=parent.subject.strip(),
+                    number=parent.catalog_nbr.strip(),
+                    courseID=parent.crse_id.strip(),
+                )
+                course.effectiveDate = parent.effdt
+                course.effectiveStatus = parent.eff_status
+                course.title = parent.course_title_long.encode('ascii','replace').strip()
+                course.description = parent.descrlong.encode('ascii','replace').strip()
+                course.unitsAcadProg = parent.units_acad_prog
+                course.contactHours = parent.crse_contact_hrs
+                course.offerNumber = parent.crse_offer_nbr
+                course.academicCareer = parent.acad_career
+            except:
+                subject, new = Subject.objects.get_or_create(
+                    name=parent.subject.strip()
+                )
+                if new:
+                    host, new = AcademicOrganization.objects.get_or_create(
+                        acad_org=parent.acad_org.strip()
+                    )
+                    subject.host = host
+                    subject.save()
+                course = self.create(
+                    subject=subject,
+                    number=parent.catalog_nbr.strip(),
+                    courseID=parent.crse_id.strip(),
+                    effectiveDate=parent.effdt,
+                    effectiveStatus=parent.eff_status,
+                    title=parent.course_title_long.encode('ascii','replace').strip(),
+                    description=parent.descrlong.encode('ascii','replace').strip(),
+                    unitsAcadProg=parent.units_acad_prog,
+                    contactHours=parent.crse_contact_hrs,
+                    offerNumber=parent.crse_offer_nbr,
+                )
+            try:
+                course.academicOrganization = AcademicOrganization.objects.get(
+                    acad_org=parent.acad_org
+                )
+            except:
+                print 'ACAD ORG: ' + parent.acad_org + ' does not yet exist'
+            try:
+                course.academicGroup = AcademicGroup.objects.get(
+                    number=parent.acad_group
+                )
+            except:
+                print 'ACAD GROUP: ' + parent.acad_group + ' does not yet exist'
             course.save()
 
 
-class CourseDefinition(models.Model):
+class Course(models.Model):
+    subject = models.ForeignKey(Subject)
+    number = models.CharField(max_length=8)
     courseID = models.CharField(max_length=6)
     effectiveDate = models.DateTimeField()
     effectiveStatus = models.CharField(max_length=1)
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=4000)
     components = models.ManyToManyField('Component', through='CourseComponent', blank=True)
-    units = models.SmallIntegerField()
+    gradingBasis = models.ManyToManyField('GradingBasis', blank=True)
+    unitsAcadProg = models.SmallIntegerField()
     contactHours = models.SmallIntegerField()
-    objects = CourseDefinitionManager()
+    offerNumber = models.IntegerField()
+    academicOrganization = models.ForeignKey(AcademicOrganization, blank=True, null=True)
+    academicGroup = models.ForeignKey(AcademicGroup, blank=True, null=True)
+    academicCareer = models.CharField(max_length=4)
+    attributes = models.ManyToManyField('CourseAttribute', blank=True)
+    cadence = models.ForeignKey('Cadence', blank=True, null=True)
+    prerequisites = models.ManyToManyField('self', blank=True,
+                                           symmetrical=False,
+                                           through='Prerequisite',
+                                           related_name='prerequisites_to')
+    corequisites = models.ManyToManyField('self', blank=True,
+                                          symmetrical=False,
+                                          related_name='corequisites_to')
+    # entranceExams = models.ManyToManyField('Exam', blank=True)
+    studentGrades = models.ManyToManyField(Student, blank=True,
+                                           through='StudentGrade',
+                                           related_name='courseGrades'
+                                           )
+    objects = CourseManager()
 
     class Meta:
-        unique_together = ('courseID', 'effectiveDate')
+        unique_together = (('subject', 'number', 'courseID'),)
+
+    def __unicode__(self):
+        return "{0} {1}    {2}".format(self.subject.__unicode__(),
+                                       self.number,
+                                       self.title
+                                       )
+
+    def units(self):
+        units = 0
+        components = self.components.all()
+        if components:
+            for component in components:
+                units += component.units
+        else:
+            units = self.unitsAcadProg
+        return units
+
+    def parsePrerequisites(self):
+        courseStrings = re.findall(self.description, '[\s\w]{4}[\s\d]{4}')
+        for courseString in courseStrings:
+            print courseString
 
 
 class CourseAttributeParent(models.Model):
-    crse_id = models.CharField(max_length=6, db_column='CRSE_ID')
-    crse_offer_nbr = models.IntegerField(db_column='CRSE_OFFER_NBR')
-    strm = models.CharField(max_length=4, db_column='STRM')
-    session_code = models.CharField(max_length=3, db_column='SESSION_CODE')
-    class_section = models.CharField(max_length=4, db_column='CLASS_SECTION')
-    crse_attr = models.CharField(max_length=4, db_column='CRSE_ATTR')
-    crse_attr_value = models.CharField(max_length=10, db_column='CRSE_ATTR_VALUE')
-
-    class Meta:
-        managed = False
-        db_table = '"CMSCOMMON"."SFO_CLASS_ATTRIBUTE"'
-
-
-class CourseAttributeValueParent(models.Model):
-    crse_attr = models.CharField(max_length=4, db_column='CRSE_ATTR')
-    effdt = models.DateTimeField(db_column='EFFDT')
+    crse_attr = models.CharField(max_length=4, db_column='CRSE_ATTR', primary_key=True)
     crse_attr_value = models.CharField(max_length=10, db_column='CRSE_ATTR_VALUE')
     descr = models.CharField(max_length=30, db_column='DESCR')
     descrformal = models.CharField(max_length=50, db_column='DESCRFORMAL')
 
     class Meta:
         managed = False
-        db_table = '"CMSCOMMON"."SFO_CRSE_ATTR_VALUE"'
-
-
-class CourseParent(models.Model):
-    acad_group = models.CharField(max_length=5, db_column='ACAD_GROUP')
-    acad_org = models.CharField(max_length=10, db_column='ACAD_ORG')
-    crse_id = models.CharField(max_length=6, db_column='CRSE_ID', primary_key=True)
-    course_title_long = models.CharField(max_length=100, db_column='COURSE_TITLE_LONG')
-    units_acad_prog = models.SmallIntegerField(db_column='UNITS_ACAD_PROG')
-    crse_contact_hrs = models.SmallIntegerField(db_column='CRSE_CONTACT_HRS')
-    descrlong = models.CharField(max_length=4000, db_column='DESCRLONG')
-    effdt = models.DateField(db_column='EFFDT')
-    fees_exist = models.CharField(max_length=1, db_column='FEES_EXIST')
-
-
-    class Meta:
-        managed = False
-        db_table = 'SFO_CRSE_CATALOG_EFF'
-
-    def __unicode__(self):
-        return '{0}  {1}  {2}'.format(
-            self.subject, self.catalog_nbr, self.course_title_long,
-        )
-
-
-class CourseManager(models.Manager):
-
-    def sync(self):
-
-        courseParents = CourseParent.objects.all()
-
-        for courseParent in courseParents:
-            try:
-                course = self.get(
-                    subject__name=courseParent.subject.strip(),
-                    number=courseParent.catalog_nbr.strip(),
-                    courseID=courseParent.crse_id.strip(),
-                )
-            except:
-                subject, new = Subject.objects.get_or_create(
-                    name=courseParent.subject.strip()
-                )
-                if new:
-                    host, new = AcademicOrganization.objects.get_or_create(
-                        acad_org=courseParent.acad_org.strip()
-                    )
-                    subject.host = host
-                    subject.save()
-                #print subject, host
-                course, new = Course.objects.get_or_create(
-                    subject=subject,
-                    number=courseParent.catalog_nbr.strip(),
-                    courseID=courseParent.crse_id.strip(),
-
-                    #title=sectionParent.course_title_long.strip()
-                )
-            course.title = courseParent.course_title_long.strip()
-            course.description = courseParent.descrlong.strip()
-            #course.units = courseParent.units_acad_prog MOVE UNITS TO COURSE COMPONENTS
-            print course
-            course.save()
-
-
+        db_table = 'COURSE_ATTRIBUTE_VW'
 
 
 class CourseAttributeManager(models.Manager):
 
-    def sync(self):
-        pass
+    def sync(self, **kwargs):
+        parents = CourseAttributeParent.objects.filter(**kwargs)
+        for parent in parents:
+            attr = self.get_or_create(
+                name=parent.crse_attr.strip(),
+                value=parent.crse_attr_value.strip(),
+                description = parent.descrformal.strip(),
+            )
 
 
 class CourseAttribute(models.Model):
-    name = models.CharField(max_length=4)
-    value = models.CharField(max_length=10)
+    name = models.CharField(max_length=4, blank=True)
+    value = models.CharField(max_length=10, blank=True)
+    description = models.CharField(max_length=50, blank=True)
     objects = CourseAttributeManager()
 
+    def __unicode__(self):
+        if all(ord(char) < 128 for char in self.description):
+            return '{0}: {1} {2}'.format(self.name, self.value, self.description)
+        else:
+            return '{0}: {1}'.format(self.name, self.value)
 
 class Cadence(models.Model):
     terms = models.CharField(max_length=30, blank=True)
@@ -873,39 +906,12 @@ class Cadence(models.Model):
     def check_term(self, term):
         pass #if term meets cadence conditions return True
 
-
-class Course(models.Model):
-    definition = models.ForeignKey(CourseDefinition, blank=True, null=True)
-    subject = models.ForeignKey(Subject)
-    number = models.CharField(max_length=8)
-    attributes = models.ManyToManyField('CourseAttribute', blank=True)
-    cadence = models.ForeignKey(Cadence, blank=True, null=True)
-    prerequisites = models.ManyToManyField('self', blank=True,
-                                           symmetrical=False,
-                                           through='Prerequisite',
-                                           related_name='prerequisites_to')
-    corequisites = models.ManyToManyField('self', blank=True,
-                                          symmetrical=False,
-                                          related_name='corequisites_to')
-    #entranceExams = models.ManyToManyField('Exam', blank=True)
-    studentGrades = models.ManyToManyField(Student, blank=True,
-                                           through='StudentGrade',
-                                           related_name='courseGrades'
-    )
-    objects = CourseManager()
-
-    class Meta:
-        unique_together = (('subject', 'number'),)
-
     def __unicode__(self):
-        return self.subject.__unicode__() + self.number.strip()
+        return '{0} terms in {1} years'.format(self.terms, self.years)
 
-    def units(self):
-        units = 0
-        for component in self.components:
-            units += component.units
-        return units
 
+
+# TODO parse prerequisites from text to course objects
 class Prerequisite(models.Model):
     requiredForCourse = models.ForeignKey(Course,
                                           related_name='coursesWithPrerequisites')
@@ -1371,8 +1377,8 @@ class SectionManager(models.Manager):
                     section.startTime = startTime
                 if sectionParent.endTime is not None and re.match('.', sectionParent.endTime):
                     section.endTime = endTime
-                if re.match('.', sectionParent.building) and re.match('.', sectionParent.room):
-                    section.room = sectionParent.building.strip() + sectionParent.room.strip()
+                #if re.match('.', sectionParent.building) and re.match('.', sectionParent.room):
+                #    section.room = sectionParent.building.strip() + sectionParent.room.strip()
                 #section.roomCap = sectionParent.roomCap
                 section.enrollCap = sectionParent.enrollCap
                 section.waitCap = sectionParent.waitCap
@@ -2056,6 +2062,11 @@ class Withdrawal(models.Model):
 #         return False
 
 
+#class DegreeCourseGroup(models.Model):
+     
+
+
+
 class DegreeStudentParent(models.Model):
 
     id = models.CharField(max_length=21, db_column='ID', primary_key=True)
@@ -2123,7 +2134,9 @@ class Degree(models.Model):
         return "{0} {1}".format(self.name, self.academicOrganization)
 
 
-
+class DegreeStudent(models.Model):
+    student = models.ForeignKey(Student)
+    degree = models.ForeignKey(Degree)
 
 
 # class AleksClass(models.Model):

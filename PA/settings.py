@@ -78,7 +78,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.oracle',
         'NAME': 'PROD',
         'USER': 'AASCIEPT',
-        'PASSWORD': 'CMMwasborn_626',
+        'PASSWORD': 'CMMwasborn_91107',
         'HOST': 'apps-db.sfsu.edu',
         'PORT': '1521',
     }
