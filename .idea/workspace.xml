@@ -20,52 +20,13 @@
       <path>
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
         <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="BRANCH:populateCourse" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:master" type="e8cecc67:BranchNodeDescriptor" />
       </path>
     </select>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="45893c50-e691-4cfa-adae-1ce0475e9a95" name="Default" comment="Add basic model for grading basis">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sshConfigs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/migrations/0003_auto_20191030_0008.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Academics/migrations/0005_auto_20200330_1929.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/migrations/0002_auto_20191027_2314.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/migrations/0003_auto_20191028_0442.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0002_auto_20181111_2100.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0003_auto_20181111_2102.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0004_auto_20181114_2359.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0005_auto_20181115_1908.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0006_auto_20181115_1914.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0007_auto_20190222_1723.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0008_auto_20190222_2355.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0009_auto_20190223_1859.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0010_auto_20190224_0002.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0011_auto_20190224_0322.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0012_auto_20190224_0607.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0013_courseparent.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0014_course_description.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0015_course_contacthours.py" beforeDir="false" afterPath="$PROJECT_DIR$/Academics/migrations/0002_course_unitsacadprog.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0016_program_aoc.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0017_auto_20190404_1818.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0018_auto_20190409_1824.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0019_auto_20190417_1837.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0020_auto_20190417_1841.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0021_auto_20190417_1859.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0022_auto_20190418_0148.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0023_auto_20190418_0253.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0024_academicgroup_acad_group.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0025_academicorganization_acad_org.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0026_auto_20190711_1817.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0027_auto_20190711_1822.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0028_auto_20190711_1908.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/0029_auto_20191025_2248.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Academics/old_migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PA/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/PA/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -225,7 +186,7 @@
       <workItem from="1585416948974" duration="963000" />
       <workItem from="1585446328340" duration="590000" />
       <workItem from="1585449370610" duration="2696000" />
-      <workItem from="1585457408137" duration="15986000" />
+      <workItem from="1585457408137" duration="17351000" />
     </task>
     <task id="LOCAL-00001" summary="introduce section preference views">
       <created>1512667978738</created>
@@ -332,7 +293,14 @@
       <option name="project" value="LOCAL" />
       <updated>1572238077522</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Add basic model for grading basis">
+      <created>1585616343207</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1585616343207</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -359,7 +327,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="populateCourse" />
+                        <option value="origin/populateCourse" />
                       </list>
                     </value>
                   </entry>
@@ -374,7 +342,23 @@
       <map>
         <entry key="Branch">
           <value>
-            <list />
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="origin/populateCourse" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="populateCourse" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="master" />
+                </option>
+              </RecentGroup>
+            </list>
           </value>
         </entry>
         <entry key="User">
@@ -405,10 +389,10 @@
     <option name="LAST_COMMIT_MESSAGE" value="Add basic model for grading basis" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="219" y="23" key="CommitChangelistDialog2" timestamp="1585614546671">
+    <state x="219" y="23" width="1075" height="833" key="CommitChangelistDialog2" timestamp="1585617223130">
       <screen x="0" y="23" width="1440" height="833" />
     </state>
-    <state x="219" y="23" key="CommitChangelistDialog2/0.23.1440.833@0.23.1440.833" timestamp="1585614546671" />
+    <state x="219" y="23" width="1075" height="833" key="CommitChangelistDialog2/0.23.1440.833@0.23.1440.833" timestamp="1585617223130" />
     <state width="1166" height="185" key="GridCell.Tab.0.bottom" timestamp="1585614546710">
       <screen x="0" y="23" width="1440" height="833" />
     </state>
@@ -438,18 +422,26 @@
       <screen x="0" y="23" width="1440" height="833" />
     </state>
     <state x="137" y="94" key="SettingsEditor/0.23.1440.833@0.23.1440.833" timestamp="1585451520394" />
-    <state x="357" y="197" key="Vcs.Push.Dialog.v2" timestamp="1585615205877">
+    <state x="357" y="197" key="Vcs.Push.Dialog.v2" timestamp="1585617303365">
       <screen x="0" y="23" width="1440" height="833" />
     </state>
-    <state x="357" y="197" key="Vcs.Push.Dialog.v2/0.23.1440.833@0.23.1440.833" timestamp="1585615205877" />
+    <state x="357" y="197" key="Vcs.Push.Dialog.v2/0.23.1440.833@0.23.1440.833" timestamp="1585617303365" />
     <state x="307" y="287" key="com.intellij.ide.util.TipDialog" timestamp="1585450070210">
       <screen x="0" y="23" width="1440" height="833" />
     </state>
     <state x="307" y="287" key="com.intellij.ide.util.TipDialog/0.23.1440.833@0.23.1440.833" timestamp="1585450070210" />
-    <state x="525" y="252" key="git4idea.merge.GitMergeDialog" timestamp="1585615488387">
+    <state x="511" y="177" key="git4idea.branch.GitSmartOperationDialog" timestamp="1585616720438">
       <screen x="0" y="23" width="1440" height="833" />
     </state>
-    <state x="525" y="252" key="git4idea.merge.GitMergeDialog/0.23.1440.833@0.23.1440.833" timestamp="1585615488387" />
+    <state x="511" y="177" key="git4idea.branch.GitSmartOperationDialog/0.23.1440.833@0.23.1440.833" timestamp="1585616720438" />
+    <state x="525" y="252" key="git4idea.merge.GitMergeDialog" timestamp="1585616919572">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state x="525" y="252" key="git4idea.merge.GitMergeDialog/0.23.1440.833@0.23.1440.833" timestamp="1585616919572" />
+    <state x="575" y="353" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1585617270784">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state x="575" y="353" key="git4idea.remote.GitConfigureRemotesDialog/0.23.1440.833@0.23.1440.833" timestamp="1585617270784" />
   </component>
   <component name="masterDetails">
     <states>
